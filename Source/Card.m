@@ -3,6 +3,8 @@
 @interface Card ()
 
 @property (nonatomic) UIImageView *titleBarImageView;
+@property (nonatomic) UIView *titleBarView;
+@property (nonatomic) UIView *squareTitleBarView;
 @property (nonatomic) CGFloat titleBarHeight;
 @property (nonatomic) UITapGestureRecognizer *tapRecognizer;
 
@@ -12,6 +14,7 @@
 
 + (NSArray *)cardsWithViewControllers:(NSArray *)viewControllers
                        titleBarHeight:(CGFloat)titleBarHeight
+                        titleBarColor:(UIColor *)titleBarColor
                         titleBarImage:(UIImage *)titleBarImage
           titleBarImageVerticalOffset:(CGFloat)titleBarImageVerticalOffset
                            titleColor:(UIColor *)titleColor
@@ -25,9 +28,15 @@
         card.viewController = viewController;
 
         card.titleBarHeight = titleBarHeight;
+        card.titleBarColor = titleBarColor;
+
+        // make sure the bottom corners of the title bar doesn't seem to be rounded
+        card.squareTitleBarView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, viewController.view.bounds.size.width, titleBarHeight)];
+        card.squareTitleBarView.backgroundColor = titleBarColor;
+        [card.viewController.view addSubview:card.squareTitleBarView];
 
         card.titleBarView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, viewController.view.bounds.size.width, titleBarHeight)];
-        card.titleBarView.backgroundColor = [UIColor orangeColor];
+        card.titleBarView.backgroundColor = titleBarColor;
         card.titleBarView.userInteractionEnabled = YES;
         card.titleBarView.layer.cornerRadius = 4.0f;
         card.titleBarView.layer.shadowColor = [[UIColor blackColor] CGColor];
@@ -57,6 +66,15 @@
     _tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
 
     return _tapRecognizer;
+}
+
+#pragma mark - Setters
+
+- (void)setTitleBarColor:(UIColor *)titleBarColor
+{
+    _titleBarColor = titleBarColor;
+    self.titleBarView.backgroundColor = titleBarColor;
+    self.squareTitleBarView.backgroundColor = titleBarColor;
 }
 
 #pragma mark - Gesture recognizers

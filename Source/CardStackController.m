@@ -27,6 +27,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 
     self.cards = [Card cardsWithViewControllers:viewControllers
                                  titleBarHeight:CardTitleBarHeight
+                                  titleBarColor:[UIColor orangeColor]
                                   titleBarImage:self.titleBarImage
                     titleBarImageVerticalOffset:self.titleBarImageVerticalOffset
                                      titleColor:self.titleColor
@@ -179,7 +180,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 }
 
 - (void)updateCardTitleBarColors {
-    UIColor *titleBarColor = ((Card *)[self.cards lastObject]).titleBarView.backgroundColor;
+    UIColor *titleBarColor = ((Card *)[self.cards lastObject]).titleBarColor;
     CGFloat red;
     CGFloat green;
     CGFloat blue;
@@ -190,7 +191,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
         CGFloat colorOffset = offset * 0.1;
         UIColor *modifiedColor = [UIColor colorWithRed:red + colorOffset green:green + colorOffset blue:blue + colorOffset alpha:1.0];
         Card *card = [self.cards objectAtIndex:i];
-        card.titleBarView.backgroundColor = modifiedColor;
+        card.titleBarColor = modifiedColor;
     }
 }
 

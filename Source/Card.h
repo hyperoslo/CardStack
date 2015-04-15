@@ -8,11 +8,12 @@
 @property (weak, nonatomic) id<CardDelegate> delegate;
 @property (nonatomic) CGFloat scale;
 @property (nonatomic) UIViewController *viewController;
-@property (nonatomic) UIView *titleBarView;
+@property (nonatomic) UIColor *titleBarColor;
 @property (nonatomic) UILabel *titleLabel;
 
 + (NSArray *)cardsWithViewControllers:(NSArray *)viewControllers
                        titleBarHeight:(CGFloat)titleBarHeight
+                        titleBarColor:(UIColor *)titleBarColor
                         titleBarImage:(UIImage *)titleBarImage
           titleBarImageVerticalOffset:(CGFloat)titleBarImageVerticalOffset
                            titleColor:(UIColor *)titleColor

@@ -87,9 +87,15 @@
 
     if (index == self.currentCardIndex) {
         if (index > 0) {
-            [self openStackAnimated:YES withCompletion:^{
-                [self.delegate cardStackControllerDidOpen:self];
-            }];
+            if (self.isOpen) {
+                [self closeStackAnimated:YES withCompletion:^{
+                    [self.delegate cardStackControllerDidClose:self];
+                }];
+            } else {
+                [self openStackAnimated:YES withCompletion:^{
+                    [self.delegate cardStackControllerDidOpen:self];
+                }];
+            }
         }
     } else {
         self.isOpen = NO;

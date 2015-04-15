@@ -1,0 +1,14 @@
+PODS:
+  - CardStack (0.1)
+
+DEPENDENCIES:
+  - CardStack (from `../`)
+
+EXTERNAL SOURCES:
+  CardStack:
+    :path: ../
+
+SPEC CHECKSUMS:
+  CardStack: cac724edc71ff8000716ee6969b98d0a14375ac9
+
+COCOAPODS: 0.36.3

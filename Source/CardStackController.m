@@ -176,7 +176,7 @@
             if (i <= self.currentCardIndex) {
                 frame.origin.y = previousTitleBarHeights + 10;
             } else {
-                frame.origin.y = self.view.bounds.size.height - self.titleBarImage.size.height;
+                frame.origin.y = self.view.bounds.size.height - (self.titleBarImage.size.height + self.titleBarImageVerticalOffset);
             }
             viewController.view.frame = frame;
 

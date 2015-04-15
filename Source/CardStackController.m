@@ -98,7 +98,11 @@
             }
         }
     } else {
-        self.isOpen = NO;
+        if (index < self.cards.count - 1) {
+            self.isOpen = NO;
+        } else {
+            self.isOpen = YES;
+        }
         [self setCurrentCardIndex:index animated:YES];
     }
 }

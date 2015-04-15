@@ -21,23 +21,26 @@
     self.vc1 = [[UIViewController alloc] init];
     self.vc1.title = @"One";
     self.vc1.view.backgroundColor = [UIColor clearColor];
+    [self addContentToViewController:self.vc1];
 
     self.vc2 = [[UIViewController alloc] init];
     self.vc2.title = @"Two";
     self.vc2.view.backgroundColor = [UIColor clearColor];
+    [self addContentToViewController:self.vc2];
 
     self.vc3 = [[UIViewController alloc] init];
     self.vc3.title = @"Three";
     self.vc3.view.backgroundColor = [UIColor clearColor];
+    [self addContentToViewController:self.vc3];
 
     self.vc4 = [[UIViewController alloc] init];
     self.vc4.title = @"Tap to open stack";
     self.vc4.view.backgroundColor = [UIColor clearColor];
+    [self addContentToViewController:self.vc4];
 
     self.cardStackController = [CardStackController new];
     self.cardStackController.delegate = self;
     self.cardStackController.titleBarImage = [UIImage imageNamed:@"titleBar.png"];
-    self.cardStackController.titleBarImageVerticalOffset = -8.0f;
     self.cardStackController.viewControllers = @[self.vc1, self.vc2, self.vc3, self.vc4];
 
     self.window.rootViewController = self.cardStackController;
@@ -56,6 +59,15 @@
 
 - (void)cardStackControllerDidClose:(CardStackController *)cardStackController
 {
+}
+
+#pragma mark - Other methods
+
+- (void)addContentToViewController:(UIViewController *)viewController
+{
+    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 20, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height - 20)];
+    view.backgroundColor = [UIColor whiteColor];
+    [viewController.view addSubview:view];
 }
 
 @end

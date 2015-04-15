@@ -11,6 +11,7 @@
 @implementation Card
 
 + (NSArray *)cardsWithViewControllers:(NSArray *)viewControllers
+                       titleBarHeight:(CGFloat)titleBarHeight
                         titleBarImage:(UIImage *)titleBarImage
           titleBarImageVerticalOffset:(CGFloat)titleBarImageVerticalOffset
                            titleColor:(UIColor *)titleColor
@@ -23,20 +24,23 @@
 
         card.viewController = viewController;
 
-        card.titleBarImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, titleBarImageVerticalOffset, viewController.view.bounds.size.width, titleBarImage.size.height)];
-        card.titleBarImageView.image = [titleBarImage resizableImageWithCapInsets:UIEdgeInsetsMake(0, 100, 0, 100)];
-        card.titleBarImageView.userInteractionEnabled = YES;
-        [card.titleBarImageView addGestureRecognizer:card.tapRecognizer];
-        [card.viewController.view addSubview:card.titleBarImageView];
+        card.titleBarHeight = titleBarHeight;
 
-        card.titleBarHeight = titleBarImage.size.height + titleBarImageVerticalOffset;
+        card.titleBarView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, viewController.view.bounds.size.width, titleBarHeight)];
+        card.titleBarView.backgroundColor = [UIColor orangeColor];
+        card.titleBarView.userInteractionEnabled = YES;
+        card.titleBarView.layer.cornerRadius = 4.0f;
+        card.titleBarView.layer.shadowColor = [[UIColor blackColor] CGColor];
+        card.titleBarView.layer.shadowOpacity = 0.5;
+        [card.titleBarView addGestureRecognizer:card.tapRecognizer];
+        [card.viewController.view addSubview:card.titleBarView];
 
-        card.titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, -titleBarImageVerticalOffset, card.titleBarImageView.bounds.size.width, card.titleBarHeight)];
+        card.titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, card.titleBarView.bounds.size.width, titleBarHeight)];
         card.titleLabel.textAlignment = NSTextAlignmentCenter;
         card.titleLabel.textColor = titleColor;
         card.titleLabel.font = titleFont;
         card.titleLabel.text = card.viewController.title;
-        [card.titleBarImageView addSubview:card.titleLabel];
+        [card.titleBarView addSubview:card.titleLabel];
 
         [cards addObject:card];
     }

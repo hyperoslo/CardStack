@@ -1,6 +1,8 @@
 #import "CardStackController.h"
 #import "Card.h"
 
+static const CGFloat CardTitleBarHeight = 44.0f;
+
 @interface CardStackController () <CardDelegate>
 
 @property (nonatomic) NSArray *cards;
@@ -24,6 +26,7 @@
     }
 
     self.cards = [Card cardsWithViewControllers:viewControllers
+                                 titleBarHeight:CardTitleBarHeight
                                   titleBarImage:self.titleBarImage
                     titleBarImageVerticalOffset:self.titleBarImageVerticalOffset
                                      titleColor:self.titleColor
@@ -59,6 +62,7 @@
     _currentCardIndex = currentCardIndex;
 
     [self updateCardScales];
+    [self updateCardTitleBarColors];
     [self updateCardLocations];
 }
 
@@ -174,6 +178,22 @@
     }
 }
 
+- (void)updateCardTitleBarColors {
+    UIColor *titleBarColor = ((Card *)[self.cards lastObject]).titleBarView.backgroundColor;
+    CGFloat red;
+    CGFloat green;
+    CGFloat blue;
+    [titleBarColor getRed:&red green:&green blue:&blue alpha:nil];
+
+    for (NSUInteger i = 0; i < self.cards.count; i++) {
+        NSInteger offset = (i - self.cards.count + 1);
+        CGFloat colorOffset = offset * 0.1;
+        UIColor *modifiedColor = [UIColor colorWithRed:red + colorOffset green:green + colorOffset blue:blue + colorOffset alpha:1.0];
+        Card *card = [self.cards objectAtIndex:i];
+        card.titleBarView.backgroundColor = modifiedColor;
+    }
+}
+
 - (void)updateCardLocations
 {
     if (self.isOpen) {
@@ -186,7 +206,7 @@
             if (i <= self.currentCardIndex) {
                 frame.origin.y = previousTitleBarHeights + 10;
             } else {
-                frame.origin.y = self.view.bounds.size.height - (self.titleBarImage.size.height + self.titleBarImageVerticalOffset);
+                frame.origin.y = self.view.bounds.size.height - CardTitleBarHeight;
             }
             viewController.view.frame = frame;
 
@@ -201,7 +221,7 @@
             if (i <= self.currentCardIndex) {
                 frame.origin.y = 0;
             } else {
-                frame.origin.y = self.view.bounds.size.height - (self.titleBarImage.size.height + self.titleBarImageVerticalOffset);
+                frame.origin.y = self.view.bounds.size.height - CardTitleBarHeight;
             }
             viewController.view.frame = frame;
         }

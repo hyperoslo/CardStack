@@ -8,6 +8,8 @@
 
 @property (nonatomic) NSArray *viewControllers;
 
+@property (nonatomic) NSUInteger currentCardIndex;
+
 @property (nonatomic) UIImage *titleBarImage;
 @property (nonatomic) CGFloat titleBarImageVerticalOffset;
 @property (nonatomic) UIColor *titleColor;

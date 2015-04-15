@@ -29,22 +29,7 @@
                                      titleColor:self.titleColor
                                       titleFont:self.titleFont];
 
-    NSUInteger index = 0;
-    for (Card *card in self.cards) {
-        card.delegate = self;
-
-        [self.view addSubview:card.viewController.view];
-
-        card.scale = 1.0 - (viewControllers.count - (index + 1)) * 0.04;
-        card.viewController.view.layer.transform = CATransform3DMakeScale(card.scale, card.scale, 1.0);
-
-        // avoid initial incorrect position caused by scaling
-        CGRect frame = card.viewController.view.frame;
-        frame.origin.y = 0;
-        card.viewController.view.frame = frame;
-
-        ++index;
-    }
+    self.currentCardIndex = self.cards.count - 1;
 }
 
 #pragma mark - Getters
@@ -67,18 +52,48 @@
     return _titleFont;
 }
 
+#pragma mark - Setters
+
+- (void)setCurrentCardIndex:(NSUInteger)currentCardIndex
+{
+    _currentCardIndex = currentCardIndex;
+
+    [self updateCardScales];
+    [self updateCardLocations];
+}
+
+- (void)setCurrentCardIndex:(NSUInteger)currentCardIndex animated:(BOOL)animated
+{
+    if (animated) {
+        [UIView animateWithDuration:0.5 animations:^{
+            self.currentCardIndex = currentCardIndex;
+        } completion:nil];
+    } else {
+        self.currentCardIndex = currentCardIndex;
+    }
+}
+
 #pragma mark - CardDelegate
 
 - (void)cardTitleTapped:(Card *)card
 {
-    if (self.isOpen) {
-        [self closeStackAnimated:YES withCompletion:^{
-            [self.delegate cardStackControllerDidClose:self];
-        }];
+    NSUInteger index = 0;
+    for (Card *c in self.cards) {
+        if ([c isEqual:card]) {
+            break;
+        }
+        ++index;
+    }
+
+    if (index == self.currentCardIndex) {
+        if (index > 0) {
+            [self openStackAnimated:YES withCompletion:^{
+                [self.delegate cardStackControllerDidOpen:self];
+            }];
+        }
     } else {
-        [self openStackAnimated:YES withCompletion:^{
-            [self.delegate cardStackControllerDidOpen:self];
-        }];
+        self.isOpen = NO;
+        [self setCurrentCardIndex:index animated:YES];
     }
 }
 
@@ -92,21 +107,11 @@
     }
 
     self.isAnimating = YES;
+    self.isOpen = YES;
     [UIView animateWithDuration:0.5 animations:^{
-        CGFloat previousTitleBarHeights = 0.0f;
-        for (NSUInteger i = 0; i < self.cards.count; i++) {
-            Card *card = [self.cards objectAtIndex:i];
-            UIViewController *viewController = card.viewController;
-
-            CGRect frame = viewController.view.frame;
-            frame.origin.y = previousTitleBarHeights + 10;
-            viewController.view.frame = frame;
-
-            previousTitleBarHeights += [card scaledTitleBarHeight];
-        }
+        [self updateCardLocations];
     } completion:^(BOOL finished) {
         self.isAnimating = NO;
-        self.isOpen = YES;
         if (completion) {
             completion();
         }
@@ -121,16 +126,11 @@
     }
 
     self.isAnimating = YES;
+    self.isOpen = NO;
     [UIView animateWithDuration:0.5 animations:^{
-        for (NSUInteger i = 0; i < self.cards.count; i++) {
-            UIViewController *viewController = ((Card *)[self.cards objectAtIndex:i]).viewController;
-            CGRect frame = viewController.view.frame;
-            frame.origin.y = 0;
-            viewController.view.frame = frame;
-        }
+        [self updateCardLocations];
     } completion:^(BOOL finished) {
         self.isAnimating = NO;
-        self.isOpen = NO;
         if (completion) {
             completion();
         }
@@ -141,6 +141,60 @@
 {
     for (Card *card in self.cards) {
         card.titleLabel.text = card.viewController.title;
+    }
+}
+
+- (void)updateCardScales
+{
+    NSUInteger index = 0;
+    for (Card *card in self.cards) {
+        card.delegate = self;
+
+        [self.view addSubview:card.viewController.view];
+
+        CGFloat scale = 1.0f;
+        if (index < self.currentCardIndex) {
+            NSInteger relativeIndex = index - self.currentCardIndex;
+            scale = 1.0 + relativeIndex * 0.04;
+        }
+        card.scale = scale;
+        card.viewController.view.layer.transform = CATransform3DMakeScale(card.scale, card.scale, 1.0);
+
+        ++index;
+    }
+}
+
+- (void)updateCardLocations
+{
+    if (self.isOpen) {
+        CGFloat previousTitleBarHeights = 0.0f;
+        for (NSUInteger i = 0; i < self.cards.count; i++) {
+            Card *card = [self.cards objectAtIndex:i];
+            UIViewController *viewController = card.viewController;
+
+            CGRect frame = viewController.view.frame;
+            if (i <= self.currentCardIndex) {
+                frame.origin.y = previousTitleBarHeights + 10;
+            } else {
+                frame.origin.y = self.view.bounds.size.height - self.titleBarImage.size.height;
+            }
+            viewController.view.frame = frame;
+
+            previousTitleBarHeights += [card scaledTitleBarHeight];
+        }
+    } else {
+        for (NSUInteger i = 0; i < self.cards.count; i++) {
+            Card *card = [self.cards objectAtIndex:i];
+            UIViewController *viewController = card.viewController;
+
+            CGRect frame = viewController.view.frame;
+            if (i <= self.currentCardIndex) {
+                frame.origin.y = 0;
+            } else {
+                frame.origin.y = self.view.bounds.size.height - (self.titleBarImage.size.height + self.titleBarImageVerticalOffset);
+            }
+            viewController.view.frame = frame;
+        }
     }
 }
 

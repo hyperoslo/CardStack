@@ -8,6 +8,7 @@
 @property (nonatomic) UIViewController *vc1;
 @property (nonatomic) UIViewController *vc2;
 @property (nonatomic) UIViewController *vc3;
+@property (nonatomic) UIViewController *vc4;
 
 @end
 
@@ -26,14 +27,18 @@
     self.vc2.view.backgroundColor = [UIColor clearColor];
 
     self.vc3 = [[UIViewController alloc] init];
-    self.vc3.title = @"Tap to open stack";
+    self.vc3.title = @"Three";
     self.vc3.view.backgroundColor = [UIColor clearColor];
+
+    self.vc4 = [[UIViewController alloc] init];
+    self.vc4.title = @"Tap to open stack";
+    self.vc4.view.backgroundColor = [UIColor clearColor];
 
     self.cardStackController = [CardStackController new];
     self.cardStackController.delegate = self;
     self.cardStackController.titleBarImage = [UIImage imageNamed:@"titleBar.png"];
     self.cardStackController.titleBarImageVerticalOffset = -8.0f;
-    self.cardStackController.viewControllers = @[self.vc1, self.vc2, self.vc3];
+    self.cardStackController.viewControllers = @[self.vc1, self.vc2, self.vc3, self.vc4];
 
     self.window.rootViewController = self.cardStackController;
     self.window.backgroundColor = [UIColor clearColor];
@@ -45,14 +50,12 @@
 
 - (void)cardStackControllerDidOpen:(CardStackController *)cardStackController
 {
-    self.vc3.title = @"Tap to close stack";
+    self.vc4.title = @"Four";
     [cardStackController updateTitles];
 }
 
 - (void)cardStackControllerDidClose:(CardStackController *)cardStackController
 {
-    self.vc3.title = @"Tap to open stack";
-    [cardStackController updateTitles];
 }
 
 @end

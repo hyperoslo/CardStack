@@ -194,6 +194,7 @@
 				TargetAttributes = {
 					9AC5E5141ADBFD6300FE1E0D = {
 						CreatedOnToolsVersion = 6.3;
+						DevelopmentTeam = XVAH95CHDC;
 					};
 					9AC5E52D1ADBFD6400FE1E0D = {
 						CreatedOnToolsVersion = 6.3;

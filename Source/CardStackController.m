@@ -15,6 +15,7 @@ static const CGFloat CardStackDepthOffset = 0.04f;
 @implementation CardStackController
 
 @synthesize titleBarBackgroundColor = _titleBarBackgroundColor;
+@synthesize titleFont = _titleFont;
 
 #pragma mark - Setters
 
@@ -26,6 +27,7 @@ static const CGFloat CardStackDepthOffset = 0.04f;
     self.cards = [CardView cardsWithViewControllers:viewControllers];
     for (CardView *card in self.cards) {
         card.delegate = self;
+        card.titleFont = self.titleFont;
         [self.view addSubview:card];
     }
 
@@ -55,6 +57,13 @@ static const CGFloat CardStackDepthOffset = 0.04f;
         } completion:nil];
     } else {
         self.currentCardIndex = currentCardIndex;
+    }
+}
+
+- (void)setTitleFont:(UIFont *)titleFont {
+    _titleFont = titleFont;
+    for (CardView *card in self.cards) {
+        card.titleFont = titleFont;
     }
 }
 
@@ -211,6 +220,7 @@ static const CGFloat CardStackDepthOffset = 0.04f;
     CardView *card = [CardView cardWithViewController:viewController];
     card.delegate = self;
     card.title = title;
+    card.titleFont = self.titleFont;
     NSMutableArray *mutableCards = [self.cards mutableCopy];
     [mutableCards insertObject:card atIndex:index];
     self.cards = [mutableCards copy];
@@ -267,6 +277,7 @@ static const CGFloat CardStackDepthOffset = 0.04f;
     CardView *card = [CardView cardWithViewController:viewController];
     card.delegate = self;
     card.title = title;
+    card.titleFont = self.titleFont;
     NSMutableArray *mutableCards = [self.cards mutableCopy];
     [mutableCards insertObject:card atIndex:index + 1];
     self.cards = [mutableCards copy];

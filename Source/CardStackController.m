@@ -1,11 +1,12 @@
 #import "CardStackController.h"
-#import "Card.h"
+#import "CardView.h"
 
-static const CGFloat CardTitleBarHeight = 44.0f;
+static const CGFloat CardStackTitleBarBackgroundColorOffset = 1.0f / 16.0f;
+static const CGFloat CardStackTopMargin = 10.0f;
+static const CGFloat CardStackDepthOffset = 0.04f;
 
-@interface CardStackController () <CardDelegate>
+@interface CardStackController () <CardViewDelegate>
 
-@property (nonatomic) NSArray *cards;
 @property (nonatomic) BOOL isAnimating;
 @property (nonatomic) BOOL isOpen;
 
@@ -13,30 +14,62 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 
 @implementation CardStackController
 
+@synthesize titleBarBackgroundColor = _titleBarBackgroundColor;
+
 #pragma mark - Setters
 
 - (void)setViewControllers:(NSArray *)viewControllers
 {
-#warning TODO: remove old title bar image views
-#warning TODO: remove old title labels
-#warning TODO: remove old cards
+    [self.cards makeObjectsPerformSelector:@selector(removeFromSuperview)];
 
-    for (Card *card in self.cards) {
-        [card.viewController.view removeFromSuperview];
+    self.cards = [CardView cardsWithViewControllers:viewControllers];
+    for (CardView *card in self.cards) {
+        card.delegate = self;
+        [self.view addSubview:card];
     }
 
-    self.cards = [Card cardsWithViewControllers:viewControllers
-                                 titleBarHeight:CardTitleBarHeight
-                                  titleBarColor:[UIColor orangeColor]
-                                  titleBarImage:self.titleBarImage
-                    titleBarImageVerticalOffset:self.titleBarImageVerticalOffset
-                                     titleColor:self.titleColor
-                                      titleFont:self.titleFont];
+    // make sure cards' title bar background colors have the depth effect
+    [self updateCardTitleBarBackgroundColors];
 
     self.currentCardIndex = self.cards.count - 1;
 }
 
+- (void)setCurrentCardIndex:(NSUInteger)currentCardIndex
+{
+    _currentCardIndex = currentCardIndex;
+
+    [self updateCardScales];
+    [self updateCardLocations];
+}
+
+- (void)setTitleBarBackgroundColor:(UIColor *)titleBarBackgroundColor
+{
+    _titleBarBackgroundColor = titleBarBackgroundColor;
+    [self updateCardTitleBarBackgroundColors];
+}
+
+- (void)setCurrentCardIndex:(NSUInteger)currentCardIndex
+                   animated:(BOOL)animated
+{
+    if (animated) {
+        [UIView animateWithDuration:0.5 animations:^{
+            self.currentCardIndex = currentCardIndex;
+        } completion:nil];
+    } else {
+        self.currentCardIndex = currentCardIndex;
+    }
+}
+
 #pragma mark - Getters
+
+- (UIColor *)titleBarBackgroundColor
+{
+    if (_titleBarBackgroundColor) return _titleBarBackgroundColor;
+
+    _titleBarBackgroundColor = [UIColor orangeColor];
+
+    return _titleBarBackgroundColor;
+}
 
 - (UIColor *)titleColor
 {
@@ -56,34 +89,12 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     return _titleFont;
 }
 
-#pragma mark - Setters
-
-- (void)setCurrentCardIndex:(NSUInteger)currentCardIndex
-{
-    _currentCardIndex = currentCardIndex;
-
-    [self updateCardScales];
-    [self updateCardTitleBarColors];
-    [self updateCardLocations];
-}
-
-- (void)setCurrentCardIndex:(NSUInteger)currentCardIndex animated:(BOOL)animated
-{
-    if (animated) {
-        [UIView animateWithDuration:0.5 animations:^{
-            self.currentCardIndex = currentCardIndex;
-        } completion:nil];
-    } else {
-        self.currentCardIndex = currentCardIndex;
-    }
-}
-
 #pragma mark - CardDelegate
 
-- (void)cardTitleTapped:(Card *)card
+- (void)cardTitleTapped:(CardView *)card
 {
     NSUInteger index = 0;
-    for (Card *c in self.cards) {
+    for (CardView *c in self.cards) {
         if ([c isEqual:card]) {
             break;
         }
@@ -93,13 +104,9 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     if (index == self.currentCardIndex) {
         if (index > 0) {
             if (self.isOpen) {
-                [self closeStackAnimated:YES withCompletion:^{
-                    [self.delegate cardStackControllerDidClose:self];
-                }];
+                [self closeStackAnimated:YES withCompletion:nil];
             } else {
-                [self openStackAnimated:YES withCompletion:^{
-                    [self.delegate cardStackControllerDidOpen:self];
-                }];
+                [self openStackAnimated:YES withCompletion:nil];
             }
         }
     } else {
@@ -121,16 +128,33 @@ static const CGFloat CardTitleBarHeight = 44.0f;
         return;
     }
 
-    self.isAnimating = YES;
     self.isOpen = YES;
-    [UIView animateWithDuration:0.5 animations:^{
+    if ([self.delegate respondsToSelector:@selector(cardStackControllerWillOpen:)]) {
+        [self.delegate cardStackControllerWillOpen:self];
+    }
+
+    if (animated) {
+        self.isAnimating = YES;
+        [UIView animateWithDuration:0.5 animations:^{
+            [self updateCardLocations];
+        } completion:^(BOOL finished) {
+            self.isAnimating = NO;
+            if ([self.delegate respondsToSelector:@selector(cardStackControllerDidOpen:)]) {
+                [self.delegate cardStackControllerDidOpen:self];
+            }
+            if (completion) {
+                completion();
+            }
+        }];
+    } else {
         [self updateCardLocations];
-    } completion:^(BOOL finished) {
-        self.isAnimating = NO;
+        if ([self.delegate respondsToSelector:@selector(cardStackControllerDidOpen:)]) {
+            [self.delegate cardStackControllerDidOpen:self];
+        }
         if (completion) {
             completion();
         }
-    }];
+    }
 }
 
 - (void)closeStackAnimated:(BOOL)animated
@@ -140,58 +164,62 @@ static const CGFloat CardTitleBarHeight = 44.0f;
         return;
     }
 
-    self.isAnimating = YES;
     self.isOpen = NO;
-    [UIView animateWithDuration:0.5 animations:^{
+    if ([self.delegate respondsToSelector:@selector(cardStackControllerWillClose:)]) {
+        [self.delegate cardStackControllerWillClose:self];
+    }
+
+    if (animated) {
+        self.isAnimating = YES;
+        [UIView animateWithDuration:0.5 animations:^{
+            [self updateCardLocations];
+        } completion:^(BOOL finished) {
+            self.isAnimating = NO;
+            if ([self.delegate respondsToSelector:@selector(cardStackControllerDidClose:)]) {
+                [self.delegate cardStackControllerDidClose:self];
+            }
+            if (completion) {
+                completion();
+            }
+        }];
+    } else {
         [self updateCardLocations];
-    } completion:^(BOOL finished) {
-        self.isAnimating = NO;
+        if ([self.delegate respondsToSelector:@selector(cardStackControllerDidClose:)]) {
+            [self.delegate cardStackControllerDidClose:self];
+        }
         if (completion) {
             completion();
         }
-    }];
-}
-
-- (void)updateTitles
-{
-    for (Card *card in self.cards) {
-        card.titleLabel.text = card.viewController.title;
     }
 }
 
 - (void)updateCardScales
 {
     NSUInteger index = 0;
-    for (Card *card in self.cards) {
-        card.delegate = self;
-
-        [self.view addSubview:card.viewController.view];
-
+    for (CardView *card in self.cards) {
         CGFloat scale = 1.0f;
         if (index < self.currentCardIndex) {
             NSInteger relativeIndex = index - self.currentCardIndex;
-            scale = 1.0 + relativeIndex * 0.04;
+            scale = 1.0 + relativeIndex * CardStackDepthOffset;
         }
         card.scale = scale;
-        card.viewController.view.layer.transform = CATransform3DMakeScale(card.scale, card.scale, 1.0);
-
         ++index;
     }
 }
 
-- (void)updateCardTitleBarColors {
-    UIColor *titleBarColor = ((Card *)[self.cards lastObject]).titleBarColor;
+- (void)updateCardTitleBarBackgroundColors {
+    UIColor *titleBarBackgroundColor = self.titleBarBackgroundColor;
     CGFloat red;
     CGFloat green;
     CGFloat blue;
-    [titleBarColor getRed:&red green:&green blue:&blue alpha:nil];
+    [titleBarBackgroundColor getRed:&red green:&green blue:&blue alpha:nil];
 
     for (NSUInteger i = 0; i < self.cards.count; i++) {
         NSInteger offset = (i - self.cards.count + 1);
-        CGFloat colorOffset = offset * 0.1;
+        CGFloat colorOffset = offset * CardStackTitleBarBackgroundColorOffset;
         UIColor *modifiedColor = [UIColor colorWithRed:red + colorOffset green:green + colorOffset blue:blue + colorOffset alpha:1.0];
-        Card *card = [self.cards objectAtIndex:i];
-        card.titleBarColor = modifiedColor;
+        CardView *card = [self.cards objectAtIndex:i];
+        card.titleBarBackgroundColor = modifiedColor;
     }
 }
 
@@ -200,31 +228,29 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     if (self.isOpen) {
         CGFloat previousTitleBarHeights = 0.0f;
         for (NSUInteger i = 0; i < self.cards.count; i++) {
-            Card *card = [self.cards objectAtIndex:i];
-            UIViewController *viewController = card.viewController;
+            CardView *card = [self.cards objectAtIndex:i];
 
-            CGRect frame = viewController.view.frame;
+            CGRect frame = card.frame;
             if (i <= self.currentCardIndex) {
-                frame.origin.y = previousTitleBarHeights + 10;
+                frame.origin.y = previousTitleBarHeights + CardStackTopMargin;
             } else {
-                frame.origin.y = self.view.bounds.size.height - CardTitleBarHeight;
+                frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
             }
-            viewController.view.frame = frame;
+            card.frame = frame;
 
-            previousTitleBarHeights += [card scaledTitleBarHeight];
+            previousTitleBarHeights += card.titleBarHeight * card.scale;
         }
     } else {
         for (NSUInteger i = 0; i < self.cards.count; i++) {
-            Card *card = [self.cards objectAtIndex:i];
-            UIViewController *viewController = card.viewController;
+            CardView *card = [self.cards objectAtIndex:i];
 
-            CGRect frame = viewController.view.frame;
+            CGRect frame = card.frame;
             if (i <= self.currentCardIndex) {
                 frame.origin.y = 0;
             } else {
-                frame.origin.y = self.view.bounds.size.height - CardTitleBarHeight;
+                frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
             }
-            viewController.view.frame = frame;
+            card.frame = frame;
         }
     }
 }

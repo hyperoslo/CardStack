@@ -1,4 +1,5 @@
 @import UIKit;
+#import "CardView.h"
 
 @protocol CardStackControllerDelegate;
 
@@ -6,12 +7,10 @@
 
 @property (weak, nonatomic) id<CardStackControllerDelegate> delegate;
 
+@property (nonatomic) NSArray *cards;
 @property (nonatomic) NSArray *viewControllers;
-
 @property (nonatomic) NSUInteger currentCardIndex;
-
-@property (nonatomic) UIImage *titleBarImage;
-@property (nonatomic) CGFloat titleBarImageVerticalOffset;
+@property (nonatomic) UIColor *titleBarBackgroundColor;
 @property (nonatomic) UIColor *titleColor;
 @property (nonatomic) UIFont *titleFont;
 
@@ -20,12 +19,13 @@
 - (void)closeStackAnimated:(BOOL)animated
             withCompletion:(void(^)())completion;
 
-- (void)updateTitles;
-
 @end
 
 @protocol CardStackControllerDelegate <NSObject>
 
+@optional
+- (void)cardStackControllerWillOpen:(CardStackController *)cardStackController;
+- (void)cardStackControllerWillClose:(CardStackController *)cardStackController;
 - (void)cardStackControllerDidOpen:(CardStackController *)cardStackController;
 - (void)cardStackControllerDidClose:(CardStackController *)cardStackController;
 

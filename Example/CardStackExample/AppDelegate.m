@@ -116,7 +116,22 @@ static const CGFloat ExampleMargin = 10.0f;
 }
 
 - (void)insertBelowAction:(UIButton *)button {
-
+    NSInteger index = button.superview.tag;
+    UIViewController *belowViewController = [self.viewControllers objectAtIndex:index];
+    UIViewController *viewController = [self createNewTestViewControllerWithTag:self.viewControllers.count];
+    [self.viewControllers insertObject:viewController atIndex:index + 1];
+    NSString *title = [NSString stringWithFormat:@"#%ld", (long)self.numberOfCardsCreated];
+    [self.cardStackController insertCardWithViewController:viewController
+                                                 withTitle:title
+                                       belowViewController:belowViewController
+                                                  animated:YES
+                                            withCompletion:^{
+                                                for (NSUInteger i = 0; i < self.viewControllers.count; i++) {
+                                                    UIViewController *viewController = [self.viewControllers objectAtIndex:i];
+                                                    viewController.view.tag = i;
+                                                }
+                                                NSLog(@"self.cardStackController.cards = %@", self.cardStackController.cards);
+                                            }];
 }
 
 - (void)removeAction:(UIButton *)button {

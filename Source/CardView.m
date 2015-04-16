@@ -17,21 +17,23 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 @synthesize titleColor = _titleColor;
 @synthesize titleFont = _titleFont;
 
-+ (NSArray *)cardsWithViewControllers:(NSArray *)viewControllers
-{
++ (CardView *)cardWithViewController:(UIViewController *)viewController {
+    CardView *card = [[CardView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    card.viewController = viewController;
+    return card;
+}
+
++ (NSArray *)cardsWithViewControllers:(NSArray *)viewControllers {
     NSMutableArray *cards = [NSMutableArray array];
 
     for (UIViewController *viewController in viewControllers) {
-        CardView *card = [[CardView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-        card.viewController = viewController;
-        [cards addObject:card];
+        [cards addObject:[CardView cardWithViewController:viewController]];
     }
 
     return [NSArray arrayWithArray:cards];
 }
 
-- (instancetype)initWithFrame:(CGRect)frame
-{
+- (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (!self) return nil;
 
@@ -48,18 +50,15 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 
 #pragma mark - Getters
 
-- (CGFloat)titleBarHeight
-{
+- (CGFloat)titleBarHeight {
     return CardTitleBarHeight;
 }
 
-- (UIColor *)titleBarBackgroundColor
-{
+- (UIColor *)titleBarBackgroundColor {
     return self.titleBarView.backgroundColor;
 }
 
-- (UIColor *)titleColor
-{
+- (UIColor *)titleColor {
     if (_titleColor) return _titleColor;
 
     _titleColor = [UIColor whiteColor];
@@ -67,8 +66,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     return _titleColor;
 }
 
-- (UIFont *)titleFont
-{
+- (UIFont *)titleFont {
     if (_titleFont) return _titleFont;
 
     _titleFont = [UIFont boldSystemFontOfSize:18.0f];
@@ -76,8 +74,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     return _titleFont;
 }
 
-- (UIView *)contentView
-{
+- (UIView *)contentView {
     if (_contentView) return _contentView;
 
     _contentView = [[UIView alloc] initWithFrame:self.bounds];
@@ -87,8 +84,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     return _contentView;
 }
 
-- (UIView *)titleBarView
-{
+- (UIView *)titleBarView {
     if (_titleBarView) return _titleBarView;
 
     _titleBarView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.titleBarHeight)];
@@ -99,8 +95,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     return _titleBarView;
 }
 
-- (UILabel *)titleLabel
-{
+- (UILabel *)titleLabel {
     if (_titleLabel) return _titleLabel;
 
     _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.titleBarView.bounds.size.width, self.titleBarHeight)];
@@ -111,8 +106,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     return _titleLabel;
 }
 
-- (UITapGestureRecognizer *)tapRecognizer
-{
+- (UITapGestureRecognizer *)tapRecognizer {
     if (_tapRecognizer) return _tapRecognizer;
 
     _tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
@@ -122,37 +116,31 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 
 #pragma mark - Setters
 
-- (void)setScale:(CGFloat)scale
-{
+- (void)setScale:(CGFloat)scale {
     _scale = scale;
     self.layer.transform = CATransform3DMakeScale(self.scale, self.scale, 1.0);
 }
 
-- (void)setTitleBarBackgroundColor:(UIColor *)titleBarBackgroundColor
-{
+- (void)setTitleBarBackgroundColor:(UIColor *)titleBarBackgroundColor {
     self.titleBarView.backgroundColor = titleBarBackgroundColor;
 }
 
-- (void)setTitleColor:(UIColor *)titleColor
-{
+- (void)setTitleColor:(UIColor *)titleColor {
     _titleColor = titleColor;
     self.titleLabel.textColor = titleColor;
 }
 
-- (void)setTitleFont:(UIFont *)titleFont
-{
+- (void)setTitleFont:(UIFont *)titleFont {
     _titleFont = titleFont;
     self.titleLabel.font = titleFont;
 }
 
-- (void)setTitle:(NSString *)title
-{
+- (void)setTitle:(NSString *)title {
     _title = title;
     self.titleLabel.text = title;
 }
 
-- (void)setViewController:(UIViewController *)viewController
-{
+- (void)setViewController:(UIViewController *)viewController {
     _viewController = viewController;
     [self.contentView addSubview:viewController.view];
     [self.contentView bringSubviewToFront:self.titleBarView];
@@ -160,9 +148,14 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 
 #pragma mark - Gesture recognizers
 
-- (void)tapAction:(UITapGestureRecognizer *)tapRecognizer
-{
+- (void)tapAction:(UITapGestureRecognizer *)tapRecognizer {
     [self.delegate cardTitleTapped:self];
+}
+
+#pragma mark - Other methods
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"%@ (%@)", self.title, self.viewController];
 }
 
 @end

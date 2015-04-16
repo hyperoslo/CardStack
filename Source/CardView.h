@@ -15,6 +15,7 @@
 
 @property (nonatomic, readonly) CGFloat titleBarHeight;
 
++ (CardView *)cardWithViewController:(UIViewController *)viewController;
 + (NSArray *)cardsWithViewControllers:(NSArray *)viewControllers;
 
 @end

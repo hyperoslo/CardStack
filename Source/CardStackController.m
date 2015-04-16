@@ -18,8 +18,9 @@ static const CGFloat CardStackDepthOffset = 0.04f;
 
 #pragma mark - Setters
 
-- (void)setViewControllers:(NSArray *)viewControllers
-{
+- (void)setViewControllers:(NSArray *)viewControllers {
+    _viewControllers = [viewControllers copy];
+
     [self.cards makeObjectsPerformSelector:@selector(removeFromSuperview)];
 
     self.cards = [CardView cardsWithViewControllers:viewControllers];
@@ -34,23 +35,20 @@ static const CGFloat CardStackDepthOffset = 0.04f;
     self.currentCardIndex = self.cards.count - 1;
 }
 
-- (void)setCurrentCardIndex:(NSUInteger)currentCardIndex
-{
+- (void)setCurrentCardIndex:(NSUInteger)currentCardIndex {
     _currentCardIndex = currentCardIndex;
 
     [self updateCardScales];
     [self updateCardLocations];
 }
 
-- (void)setTitleBarBackgroundColor:(UIColor *)titleBarBackgroundColor
-{
+- (void)setTitleBarBackgroundColor:(UIColor *)titleBarBackgroundColor {
     _titleBarBackgroundColor = titleBarBackgroundColor;
     [self updateCardTitleBarBackgroundColors];
 }
 
 - (void)setCurrentCardIndex:(NSUInteger)currentCardIndex
-                   animated:(BOOL)animated
-{
+                   animated:(BOOL)animated {
     if (animated) {
         [UIView animateWithDuration:0.5 animations:^{
             self.currentCardIndex = currentCardIndex;
@@ -62,8 +60,7 @@ static const CGFloat CardStackDepthOffset = 0.04f;
 
 #pragma mark - Getters
 
-- (UIColor *)titleBarBackgroundColor
-{
+- (UIColor *)titleBarBackgroundColor {
     if (_titleBarBackgroundColor) return _titleBarBackgroundColor;
 
     _titleBarBackgroundColor = [UIColor orangeColor];
@@ -71,8 +68,7 @@ static const CGFloat CardStackDepthOffset = 0.04f;
     return _titleBarBackgroundColor;
 }
 
-- (UIColor *)titleColor
-{
+- (UIColor *)titleColor {
     if (_titleColor) return _titleColor;
 
     _titleColor = [UIColor whiteColor];
@@ -80,8 +76,7 @@ static const CGFloat CardStackDepthOffset = 0.04f;
     return _titleColor;
 }
 
-- (UIFont *)titleFont
-{
+- (UIFont *)titleFont {
     if (_titleFont) return _titleFont;
 
     _titleFont = [UIFont boldSystemFontOfSize:18.0f];
@@ -91,8 +86,7 @@ static const CGFloat CardStackDepthOffset = 0.04f;
 
 #pragma mark - CardDelegate
 
-- (void)cardTitleTapped:(CardView *)card
-{
+- (void)cardTitleTapped:(CardView *)card {
     NSUInteger index = 0;
     for (CardView *c in self.cards) {
         if ([c isEqual:card]) {
@@ -122,8 +116,7 @@ static const CGFloat CardStackDepthOffset = 0.04f;
 #pragma mark - Other methods
 
 - (void)openStackAnimated:(BOOL)animated
-           withCompletion:(void(^)())completion
-{
+           withCompletion:(void(^)())completion {
     if (self.isAnimating) {
         return;
     }
@@ -158,8 +151,7 @@ static const CGFloat CardStackDepthOffset = 0.04f;
 }
 
 - (void)closeStackAnimated:(BOOL)animated
-            withCompletion:(void(^)())completion
-{
+            withCompletion:(void(^)())completion {
     if (self.isAnimating) {
         return;
     }
@@ -193,8 +185,120 @@ static const CGFloat CardStackDepthOffset = 0.04f;
     }
 }
 
-- (void)updateCardScales
-{
+- (void)insertCardWithViewController:(UIViewController *)viewController
+                           withTitle:(NSString *)title
+                 aboveViewController:(UIViewController *)aboveViewController
+                            animated:(BOOL)animated
+                      withCompletion:(void(^)())completion {
+    NSUInteger index = 0;
+    for (UIViewController *v in self.viewControllers) {
+        if ([v isEqual:aboveViewController]) {
+            break;
+        }
+        ++index;
+    }
+    if (index == self.viewControllers.count) {
+        return;
+    }
+
+    NSMutableArray *mutableViewControllers = [self.viewControllers mutableCopy];
+    [mutableViewControllers insertObject:viewController atIndex:index];
+
+    // don't user setter to avoid full rebuild
+    _viewControllers = [mutableViewControllers copy];
+
+    CardView *aboveCard = [self.cards objectAtIndex:index];
+    CardView *card = [CardView cardWithViewController:viewController];
+    card.delegate = self;
+    card.title = title;
+    NSMutableArray *mutableCards = [self.cards mutableCopy];
+    [mutableCards insertObject:card atIndex:index];
+    self.cards = [mutableCards copy];
+    [self.view insertSubview:card belowSubview:aboveCard];
+
+    // this will make the new card appear from beneath the old card (if the stack is open)
+    card.frame = aboveCard.frame;
+
+    if (animated) {
+        [UIView animateWithDuration:0.2 animations:^{
+            [self updateCardScales];
+            [self updateCardLocations];
+            [self updateCardTitleBarBackgroundColors];
+            self.currentCardIndex = index + 1;
+        } completion:^(BOOL finished) {
+            if (completion) {
+                completion();
+            }
+        }];
+    } else {
+        [self updateCardScales];
+        [self updateCardLocations];
+        [self updateCardTitleBarBackgroundColors];
+        self.currentCardIndex = index + 1;
+        if (completion) {
+            completion();
+        }
+    }
+}
+
+- (void)removeCardAtIndex:(NSUInteger)index
+                 animated:(BOOL)animated
+           withCompletion:(void(^)())completion {
+    if (self.cards.count < 2 || index > self.cards.count - 1) {
+        return;
+    }
+    
+    // avoid unwanted animation if the topmost card is removed
+    if (!self.isOpen) {
+        animated = NO;
+    }
+
+    NSMutableArray *mutableViewControllers = [self.viewControllers mutableCopy];
+    [mutableViewControllers removeObjectAtIndex:index];
+
+    // don't user setter to avoid full rebuild
+    _viewControllers = [mutableViewControllers copy];
+
+    CardView *card = [self.cards objectAtIndex:index];
+    [card removeFromSuperview];
+
+    NSMutableArray *mutableCards = [self.cards mutableCopy];
+    [mutableCards removeObjectAtIndex:index];
+    self.cards = [mutableCards copy];
+
+    if (animated) {
+        [UIView animateWithDuration:0.2 animations:^{
+            if (self.cards.count == 1 && self.isOpen) {
+                self.isOpen = NO;
+            }
+            [self updateCardScales];
+            [self updateCardLocations];
+            [self updateCardTitleBarBackgroundColors];
+            if (self.currentCardIndex > 0 && self.currentCardIndex > self.cards.count - 1) {
+                self.currentCardIndex = self.cards.count - 1;
+            }
+        } completion:^(BOOL finished) {
+            if (completion) {
+                completion();
+            }
+        }];
+    } else {
+        if (self.cards.count == 1 && self.isOpen) {
+            self.isOpen = NO;
+        }
+        [self updateCardScales];
+        [self updateCardLocations];
+        [self updateCardTitleBarBackgroundColors];
+        if (self.currentCardIndex > 0 && self.currentCardIndex > self.cards.count - 1) {
+            self.currentCardIndex = self.cards.count - 1;
+        }
+        if (completion) {
+            completion();
+        }
+    }
+}
+
+- (void)updateCardScales {
     NSUInteger index = 0;
     for (CardView *card in self.cards) {
         CGFloat scale = 1.0f;
@@ -223,8 +327,7 @@ static const CGFloat CardStackDepthOffset = 0.04f;
     }
 }
 
-- (void)updateCardLocations
-{
+- (void)updateCardLocations {
     if (self.isOpen) {
         CGFloat previousTitleBarHeights = 0.0f;
         for (NSUInteger i = 0; i < self.cards.count; i++) {

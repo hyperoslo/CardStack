@@ -19,6 +19,15 @@
 - (void)closeStackAnimated:(BOOL)animated
             withCompletion:(void(^)())completion;
 
+- (void)insertCardWithViewController:(UIViewController *)viewController
+                           withTitle:(NSString *)title
+                 aboveViewController:(UIViewController *)aboveViewController
+                            animated:(BOOL)animated
+                      withCompletion:(void(^)())completion;
+- (void)removeCardAtIndex:(NSUInteger)index
+                 animated:(BOOL)animated
+           withCompletion:(void(^)())completion;
+
 @end
 
 @protocol CardStackControllerDelegate <NSObject>

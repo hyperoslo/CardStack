@@ -1,14 +1,12 @@
 #import "AppDelegate.h"
 #import "CardStackController.h"
 
+static const NSUInteger ExampleNumberOfInitialCards = 4;
+
 @interface AppDelegate () <CardStackControllerDelegate>
 
 @property (nonatomic) CardStackController *cardStackController;
-
-@property (nonatomic) UIViewController *vc1;
-@property (nonatomic) UIViewController *vc2;
-@property (nonatomic) UIViewController *vc3;
-@property (nonatomic) UIViewController *vc4;
+@property (nonatomic) NSMutableArray *viewControllers;
 
 @end
 
@@ -18,25 +16,14 @@
 {
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
 
-    self.vc1 = [[UIViewController alloc] init];
-    self.vc1.view.backgroundColor = [UIColor clearColor];
-    [self addContentToViewController:self.vc1];
-
-    self.vc2 = [[UIViewController alloc] init];
-    self.vc2.view.backgroundColor = [UIColor clearColor];
-    [self addContentToViewController:self.vc2];
-
-    self.vc3 = [[UIViewController alloc] init];
-    self.vc3.view.backgroundColor = [UIColor clearColor];
-    [self addContentToViewController:self.vc3];
-
-    self.vc4 = [[UIViewController alloc] init];
-    self.vc4.view.backgroundColor = [UIColor clearColor];
-    [self addContentToViewController:self.vc4];
+    self.viewControllers = [NSMutableArray new];
+    for (NSUInteger i = 0; i < ExampleNumberOfInitialCards; i++) {
+        [self.viewControllers addObject:[self createNewTestViewController]];
+    }
 
     self.cardStackController = [CardStackController new];
     self.cardStackController.delegate = self;
-    self.cardStackController.viewControllers = @[self.vc1, self.vc2, self.vc3, self.vc4];
+    self.cardStackController.viewControllers = self.viewControllers;
     for (NSUInteger i = 0; i < self.cardStackController.cards.count; i++) {
         CardView *card = [self.cardStackController.cards objectAtIndex:i];
         if (i < self.cardStackController.cards.count - 1) {
@@ -62,11 +49,12 @@
 
 #pragma mark - Other methods
 
-- (void)addContentToViewController:(UIViewController *)viewController
-{
-    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 20, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height - 20)];
-    view.backgroundColor = [UIColor whiteColor];
-    [viewController.view addSubview:view];
+- (UIViewController *)createNewTestViewController {
+    UIViewController *viewController = [[UIViewController alloc] init];
+
+    viewController.view.backgroundColor = [UIColor whiteColor];
+
+    return viewController;
 }
 
 @end

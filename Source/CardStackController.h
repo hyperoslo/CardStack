@@ -24,6 +24,11 @@
                  aboveViewController:(UIViewController *)aboveViewController
                             animated:(BOOL)animated
                       withCompletion:(void(^)())completion;
+- (void)insertCardWithViewController:(UIViewController *)viewController
+                           withTitle:(NSString *)title
+                 belowViewController:(UIViewController *)belowViewController
+                            animated:(BOOL)animated
+                      withCompletion:(void(^)())completion;
 - (void)removeCardAtIndex:(NSUInteger)index
                  animated:(BOOL)animated
            withCompletion:(void(^)())completion;

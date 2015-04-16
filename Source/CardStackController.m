@@ -241,13 +241,65 @@ static const CGFloat CardStackDepthOffset = 0.04f;
     }
 }
 
+- (void)insertCardWithViewController:(UIViewController *)viewController
+                           withTitle:(NSString *)title
+                 belowViewController:(UIViewController *)belowViewController
+                            animated:(BOOL)animated
+                      withCompletion:(void(^)())completion {
+    NSUInteger index = 0;
+    for (UIViewController *v in self.viewControllers) {
+        if ([v isEqual:belowViewController]) {
+            break;
+        }
+        ++index;
+    }
+    if (index == self.viewControllers.count) {
+        return;
+    }
+
+    NSMutableArray *mutableViewControllers = [self.viewControllers mutableCopy];
+    [mutableViewControllers insertObject:viewController atIndex:index + 1];
+
+    // don't user setter to avoid full rebuild
+    _viewControllers = [mutableViewControllers copy];
+
+    CardView *belowCard = [self.cards objectAtIndex:index];
+    CardView *card = [CardView cardWithViewController:viewController];
+    card.delegate = self;
+    card.title = title;
+    NSMutableArray *mutableCards = [self.cards mutableCopy];
+    [mutableCards insertObject:card atIndex:index + 1];
+    self.cards = [mutableCards copy];
+    [self.view insertSubview:card aboveSubview:belowCard];
+    card.frame = belowCard.frame;
+
+    if (animated) {
+        [UIView animateWithDuration:0.2 animations:^{
+            [self updateCardScales];
+            [self updateCardLocations];
+            [self updateCardTitleBarBackgroundColors];
+        } completion:^(BOOL finished) {
+            if (completion) {
+                completion();
+            }
+        }];
+    } else {
+        [self updateCardScales];
+        [self updateCardLocations];
+        [self updateCardTitleBarBackgroundColors];
+        if (completion) {
+            completion();
+        }
+    }
+}
+
 - (void)removeCardAtIndex:(NSUInteger)index
                  animated:(BOOL)animated
            withCompletion:(void(^)())completion {
     if (self.cards.count < 2 || index > self.cards.count - 1) {
         return;
     }
-    
+
     // avoid unwanted animation if the topmost card is removed
     if (!self.isOpen) {
         animated = NO;
@@ -341,7 +393,8 @@ static const CGFloat CardStackDepthOffset = 0.04f;
             }
             card.frame = frame;
 
-            previousTitleBarHeights += card.titleBarHeight * card.scale;
+            // -1.0f is used to avoid area below the title bar to become slightly visible is some cases (due to rounding errors)
+            previousTitleBarHeights += (card.titleBarHeight * card.scale - 1.0f);
         }
     } else {
         for (NSUInteger i = 0; i < self.cards.count; i++) {

@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = "CardStack"
   s.summary          = "A short description of CardStack."
-  s.version          = "0.1"
+  s.version          = "0.2"
   s.homepage         = "https://github.com/hyperoslo/CardStack"
   s.license          = 'MIT'
   s.author           = { "Hyper Interaktiv AS" => "ios@hyper.no" }

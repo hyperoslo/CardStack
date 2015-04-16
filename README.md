@@ -5,6 +5,10 @@
 [![License](https://img.shields.io/cocoapods/l/CardStack.svg?style=flat)](http://cocoadocs.org/docsets/CardStack)
 [![Platform](https://img.shields.io/cocoapods/p/CardStack.svg?style=flat)](http://cocoadocs.org/docsets/CardStack)
 
+## Screenshot
+
+![](Images/screenshot.png?raw=true)
+
 ## Usage
 
 ```objc

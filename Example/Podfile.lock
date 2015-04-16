@@ -1,8 +1,10 @@
 PODS:
   - CardStack (0.1)
+  - Masonry (0.6.1)
 
 DEPENDENCIES:
   - CardStack (from `../`)
+  - Masonry (~> 0.6)
 
 EXTERNAL SOURCES:
   CardStack:
@@ -10,5 +12,6 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   CardStack: cac724edc71ff8000716ee6969b98d0a14375ac9
+  Masonry: 4972309f2f134de9dd312f4dc4a21359b50e6caa
 
 COCOAPODS: 0.36.3

@@ -22,6 +22,8 @@
 
 @protocol CardViewDelegate <NSObject>
 
+@optional
 - (void)cardTitleTapped:(CardView *)card;
+- (void)cardRemoveRequested:(CardView *)card;
 
 @end

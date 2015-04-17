@@ -105,6 +105,7 @@ static const CGFloat ExampleMargin = 10.0f;
     [self.cardStackController insertCardWithViewController:viewController
                                                  withTitle:title
                                        aboveViewController:aboveViewController
+                                               makeCurrent:NO
                                                   animated:YES
                                             withCompletion:^{
                                                 for (NSUInteger i = 0; i < self.viewControllers.count; i++) {
@@ -124,6 +125,7 @@ static const CGFloat ExampleMargin = 10.0f;
     [self.cardStackController insertCardWithViewController:viewController
                                                  withTitle:title
                                        belowViewController:belowViewController
+                                               makeCurrent:NO
                                                   animated:YES
                                             withCompletion:^{
                                                 for (NSUInteger i = 0; i < self.viewControllers.count; i++) {

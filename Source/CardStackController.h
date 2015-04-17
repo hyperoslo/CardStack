@@ -22,11 +22,13 @@
 - (void)insertCardWithViewController:(UIViewController *)viewController
                            withTitle:(NSString *)title
                  aboveViewController:(UIViewController *)aboveViewController
+                         makeCurrent:(BOOL)makeCurrent
                             animated:(BOOL)animated
                       withCompletion:(void(^)())completion;
 - (void)insertCardWithViewController:(UIViewController *)viewController
                            withTitle:(NSString *)title
                  belowViewController:(UIViewController *)belowViewController
+                         makeCurrent:(BOOL)makeCurrent
                             animated:(BOOL)animated
                       withCompletion:(void(^)())completion;
 - (void)removeCardAtIndex:(NSUInteger)index

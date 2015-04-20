@@ -19,6 +19,7 @@
 
 - (void)openStackAnimated:(BOOL)animated
            withCompletion:(void(^)())completion;
+
 - (void)closeStackAnimated:(BOOL)animated
             withCompletion:(void(^)())completion;
 
@@ -28,12 +29,14 @@
                          makeCurrent:(BOOL)makeCurrent
                             animated:(BOOL)animated
                       withCompletion:(void(^)())completion;
+
 - (void)insertCardWithViewController:(UIViewController *)viewController
                            withTitle:(NSString *)title
                  belowViewController:(UIViewController *)belowViewController
                          makeCurrent:(BOOL)makeCurrent
                             animated:(BOOL)animated
                       withCompletion:(void(^)())completion;
+
 - (void)removeCardAtIndex:(NSUInteger)index
                  animated:(BOOL)animated
            withCompletion:(void(^)())completion;

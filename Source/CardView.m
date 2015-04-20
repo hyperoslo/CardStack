@@ -10,6 +10,8 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 @property (nonatomic) UILabel *titleLabel;
 @property (nonatomic) UITapGestureRecognizer *tapRecognizer;
 @property (nonatomic) UISwipeGestureRecognizer *swipeRightRecognizer;
+@property (nonatomic) UISwipeGestureRecognizer *swipeUpRecognizer;
+@property (nonatomic) UISwipeGestureRecognizer *swipeDownRecognizer;
 
 @end
 
@@ -93,6 +95,8 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     _titleBarView.userInteractionEnabled = YES;
     [_titleBarView addGestureRecognizer:self.tapRecognizer];
     [_titleBarView addGestureRecognizer:self.swipeRightRecognizer];
+    [_titleBarView addGestureRecognizer:self.swipeUpRecognizer];
+    [_titleBarView addGestureRecognizer:self.swipeDownRecognizer];
 
     return _titleBarView;
 }
@@ -123,6 +127,24 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     _swipeRightRecognizer.direction = UISwipeGestureRecognizerDirectionRight;
 
     return _swipeRightRecognizer;
+}
+
+- (UISwipeGestureRecognizer *)swipeUpRecognizer {
+    if (_swipeUpRecognizer) return _swipeUpRecognizer;
+
+    _swipeUpRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeUpAction:)];
+    _swipeUpRecognizer.direction = UISwipeGestureRecognizerDirectionUp;
+
+    return _swipeUpRecognizer;
+}
+
+- (UISwipeGestureRecognizer *)swipeDownRecognizer {
+    if (_swipeDownRecognizer) return _swipeDownRecognizer;
+
+    _swipeDownRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDownAction:)];
+    _swipeDownRecognizer.direction = UISwipeGestureRecognizerDirectionDown;
+
+    return _swipeDownRecognizer;
 }
 
 #pragma mark - Setters
@@ -168,6 +190,18 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 - (void)swipeRightAction:(UISwipeGestureRecognizer *)swipeRightRecognizer {
     if ([self.delegate respondsToSelector:@selector(cardRemoveRequested:)]) {
         [self.delegate cardRemoveRequested:self];
+    }
+}
+
+- (void)swipeUpAction:(UISwipeGestureRecognizer *)swipeRightRecognizer {
+    if ([self.delegate respondsToSelector:@selector(cardTitleSwipeUp:)]) {
+        [self.delegate cardTitleSwipeUp:self];
+    }
+}
+
+- (void)swipeDownAction:(UISwipeGestureRecognizer *)swipeRightRecognizer {
+    if ([self.delegate respondsToSelector:@selector(cardTitleSwipeDown:)]) {
+        [self.delegate cardTitleSwipeDown:self];
     }
 }
 

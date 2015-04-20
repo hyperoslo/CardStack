@@ -4,6 +4,7 @@
 static const CGFloat CardStackTitleBarBackgroundColorOffset = 1.0f / 16.0f;
 static const CGFloat CardStackTopMargin = 10.0f;
 static const CGFloat CardStackDepthOffset = 0.04f;
+static const CGFloat CardStackTitleBarHeightWhenSearchIsShown = 8.0f;
 
 @interface CardStackController () <CardViewDelegate>
 
@@ -16,6 +17,15 @@ static const CGFloat CardStackDepthOffset = 0.04f;
 
 @synthesize titleBarBackgroundColor = _titleBarBackgroundColor;
 @synthesize titleFont = _titleFont;
+
+- (instancetype)init {
+    self = [super init];
+    if (!self) return nil;
+
+    self.isSeachViewControllerHidden = YES;
+
+    return self;
+}
 
 #pragma mark - Setters
 
@@ -64,6 +74,54 @@ static const CGFloat CardStackDepthOffset = 0.04f;
     _titleFont = titleFont;
     for (CardView *card in self.cards) {
         card.titleFont = titleFont;
+    }
+}
+
+- (void)setSearchViewController:(UIViewController *)searchViewController {
+    [_searchViewController.view removeFromSuperview];
+
+    _searchViewController = searchViewController;
+    [self.view addSubview:searchViewController.view];
+
+    CGRect frame = searchViewController.view.frame;
+    frame.origin.y = -searchViewController.view.frame.size.height;
+    searchViewController.view.frame = frame;
+}
+
+- (void)setIsSeachViewControllerHidden:(BOOL)isSeachViewControllerHidden {
+    [self setIsSeachViewControllerHidden:isSeachViewControllerHidden
+                                animated:NO
+                          withCompletion:nil];
+}
+
+- (void)setIsSeachViewControllerHidden:(BOOL)isSeachViewControllerHidden
+                              animated:(BOOL)animated
+                        withCompletion:(void(^)())completion {
+    if (!isSeachViewControllerHidden && !self.searchViewController) {
+        return;
+    }
+
+    _isSeachViewControllerHidden = isSeachViewControllerHidden;
+    if (animated) {
+        [UIView animateWithDuration:0.5 animations:^{
+            [self updateCardLocations];
+        } completion:^(BOOL finished) {
+            if (completion) {
+                completion();
+            }
+        }];
+    } else {
+        [self updateCardLocations];
+        if (completion) {
+            completion();
+        }
+    }
+}
+
+- (void)setIsOpen:(BOOL)isOpen {
+    _isOpen = isOpen;
+    if (isOpen && !self.isSeachViewControllerHidden) {
+        _isSeachViewControllerHidden = YES;
     }
 }
 
@@ -138,6 +196,35 @@ static const CGFloat CardStackDepthOffset = 0.04f;
     [self removeCardAtIndex:index
                    animated:YES
              withCompletion:nil];
+}
+
+- (void)cardTitleSwipeUp:(CardView *)card {
+    if (!self.isSeachViewControllerHidden) {
+        if (self.isOpen) {
+            _isOpen = NO;
+        }
+        [self setIsSeachViewControllerHidden:YES
+                                    animated:YES
+                              withCompletion:nil];
+    } else {
+        if (self.isOpen) {
+            [self closeStackAnimated:YES
+                      withCompletion:nil];
+        }
+    }
+}
+
+- (void)cardTitleSwipeDown:(CardView *)card {
+    if (!self.isOpen) {
+        [self openStackAnimated:YES
+                 withCompletion:nil];
+    } else {
+        if (self.isSeachViewControllerHidden) {
+            [self setIsSeachViewControllerHidden:NO
+                                        animated:YES
+                                  withCompletion:nil];
+        }
+    }
 }
 
 #pragma mark - Other methods
@@ -435,33 +522,58 @@ static const CGFloat CardStackDepthOffset = 0.04f;
 }
 
 - (void)updateCardLocations {
-    if (self.isOpen) {
+    if (self.isSeachViewControllerHidden) {
+        CGRect frame = self.searchViewController.view.frame;
+        frame.origin.y = -self.searchViewController.view.bounds.size.height;
+        self.searchViewController.view.frame = frame;
+
+        if (self.isOpen) {
+            CGFloat previousTitleBarHeights = 0.0f;
+            for (NSUInteger i = 0; i < self.cards.count; i++) {
+                CardView *card = [self.cards objectAtIndex:i];
+
+                CGRect frame = card.frame;
+                if (i <= self.currentCardIndex) {
+                    frame.origin.y = previousTitleBarHeights + CardStackTopMargin;
+                } else {
+                    frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
+                }
+                card.frame = frame;
+
+                // -1.0f is used to avoid area below the title bar to become slightly visible is some cases (due to rounding errors)
+                previousTitleBarHeights += (card.titleBarHeight * card.scale - 1.0f);
+            }
+        } else {
+            for (NSUInteger i = 0; i < self.cards.count; i++) {
+                CardView *card = [self.cards objectAtIndex:i];
+
+                CGRect frame = card.frame;
+                if (i <= self.currentCardIndex) {
+                    frame.origin.y = 0;
+                } else {
+                    frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
+                }
+                card.frame = frame;
+            }
+        }
+    } else {
+        CGRect frame = self.searchViewController.view.frame;
+        frame.origin.y = 0.0f;
+        self.searchViewController.view.frame = frame;
+
         CGFloat previousTitleBarHeights = 0.0f;
         for (NSUInteger i = 0; i < self.cards.count; i++) {
             CardView *card = [self.cards objectAtIndex:i];
 
             CGRect frame = card.frame;
             if (i <= self.currentCardIndex) {
-                frame.origin.y = previousTitleBarHeights + CardStackTopMargin;
+                frame.origin.y = self.searchViewController.view.bounds.size.height + previousTitleBarHeights + CardStackTopMargin;
             } else {
-                frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
+                frame.origin.y = self.searchViewController.view.bounds.size.height + self.view.bounds.size.height - card.titleBarHeight;
             }
             card.frame = frame;
 
-            // -1.0f is used to avoid area below the title bar to become slightly visible is some cases (due to rounding errors)
-            previousTitleBarHeights += (card.titleBarHeight * card.scale - 1.0f);
-        }
-    } else {
-        for (NSUInteger i = 0; i < self.cards.count; i++) {
-            CardView *card = [self.cards objectAtIndex:i];
-
-            CGRect frame = card.frame;
-            if (i <= self.currentCardIndex) {
-                frame.origin.y = 0;
-            } else {
-                frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
-            }
-            card.frame = frame;
+            previousTitleBarHeights += CardStackTitleBarHeightWhenSearchIsShown;
         }
     }
 }

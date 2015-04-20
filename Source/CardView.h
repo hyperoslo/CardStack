@@ -25,5 +25,7 @@
 @optional
 - (void)cardTitleTapped:(CardView *)card;
 - (void)cardRemoveRequested:(CardView *)card;
+- (void)cardTitleSwipeUp:(CardView *)card;
+- (void)cardTitleSwipeDown:(CardView *)card;
 
 @end

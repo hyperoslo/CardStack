@@ -25,5 +25,6 @@
 @optional
 - (void)cardTitleTapped:(CardView *)card;
 - (void)cardRemoveRequested:(CardView *)card;
+- (void)card:(CardView *)card titlePannedByDelta:(CGPoint)delta;
 
 @end

@@ -10,6 +10,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 @property (nonatomic) UILabel *titleLabel;
 @property (nonatomic) UITapGestureRecognizer *tapRecognizer;
 @property (nonatomic) UISwipeGestureRecognizer *swipeRightRecognizer;
+@property (nonatomic) UIPanGestureRecognizer *panRecognizer;
 
 @end
 
@@ -93,6 +94,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     _titleBarView.userInteractionEnabled = YES;
     [_titleBarView addGestureRecognizer:self.tapRecognizer];
     [_titleBarView addGestureRecognizer:self.swipeRightRecognizer];
+    [_titleBarView addGestureRecognizer:self.panRecognizer];
 
     return _titleBarView;
 }
@@ -123,6 +125,14 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     _swipeRightRecognizer.direction = UISwipeGestureRecognizerDirectionRight;
 
     return _swipeRightRecognizer;
+}
+
+- (UIPanGestureRecognizer *)panRecognizer {
+    if (_panRecognizer) return _panRecognizer;
+
+    _panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panAction:)];
+
+    return _panRecognizer;
 }
 
 #pragma mark - Setters
@@ -168,6 +178,16 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 - (void)swipeRightAction:(UISwipeGestureRecognizer *)swipeRightRecognizer {
     if ([self.delegate respondsToSelector:@selector(cardRemoveRequested:)]) {
         [self.delegate cardRemoveRequested:self];
+    }
+}
+
+- (void)panAction:(UIPanGestureRecognizer *)panRecognizer {
+    static CGPoint originalPoint;
+
+    if (panRecognizer.state == UIGestureRecognizerStateBegan) {
+        originalPoint = [panRecognizer locationInView:self.superview];
+    } else if (panRecognizer.state == UIGestureRecognizerStateChanged) {
+        
     }
 }
 

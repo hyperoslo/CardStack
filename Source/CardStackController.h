@@ -14,6 +14,9 @@
 @property (nonatomic) UIColor *titleColor;
 @property (nonatomic) UIFont *titleFont;
 
+@property (nonatomic) UIViewController *searchViewController;
+@property (nonatomic) BOOL isSeachViewControllerHidden;
+
 - (void)openStackAnimated:(BOOL)animated
            withCompletion:(void(^)())completion;
 - (void)closeStackAnimated:(BOOL)animated
@@ -34,6 +37,10 @@
 - (void)removeCardAtIndex:(NSUInteger)index
                  animated:(BOOL)animated
            withCompletion:(void(^)())completion;
+
+- (void)setIsSeachViewControllerHidden:(BOOL)isSeachViewControllerHidden
+                              animated:(BOOL)animated
+                        withCompletion:(void(^)())completion;
 
 @end
 

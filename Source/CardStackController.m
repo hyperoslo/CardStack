@@ -178,7 +178,9 @@ static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
         springAnimation.velocity = [NSValue valueWithCGRect:CGRectMake(0, springVelocity, 0, 0)];
 
         [card pop_addAnimation:springAnimation forKey:@"frame"];
-        previousTitleBarHeights += card.titleBarHeight * card.scale;
+
+        // -1.0f is used to avoid area below the title bar to become slightly visible is some cases (due to rounding errors)
+        previousTitleBarHeights += (card.titleBarHeight * card.scale - 1.0f);
     }
 }
 
@@ -481,7 +483,7 @@ static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
         CGFloat previousTitleBarHeights = 0.0f;
         for (NSUInteger i = 0; i < self.cards.count; i++) {
             CardView *card = [self.cards objectAtIndex:i];
-            
+
             CGRect frame = card.frame;
             if (i <= self.currentCardIndex) {
                 frame.origin.y = previousTitleBarHeights + CardStackTopMargin;
@@ -489,7 +491,7 @@ static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
                 frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
             }
             card.frame = frame;
-            
+
             // -1.0f is used to avoid area below the title bar to become slightly visible is some cases (due to rounding errors)
             previousTitleBarHeights += (card.titleBarHeight * card.scale - 1.0f);
         }
@@ -523,7 +525,7 @@ static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
         }
     }
 
-    for (NSUInteger i = self.currentCardIndex; i < self.cards.count - 1; i++) {
+    for (NSUInteger i = self.currentCardIndex + 1; i < self.cards.count - 1; i++) {
         CardView *card = [self.cards objectAtIndex:i];
         CGRect frame = card.frame;
         frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;

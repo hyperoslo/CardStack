@@ -45,6 +45,11 @@ static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
 
     [self updateCardScales];
     [self updateCardLocations];
+    
+    for (NSUInteger i = 0; i < self.cards.count; i++) {
+        CardView *card = [self.cards objectAtIndex:i];
+        card.panRecognizer.enabled = (i == currentCardIndex);
+    }
 }
 
 - (void)setTitleBarBackgroundColor:(UIColor *)titleBarBackgroundColor {

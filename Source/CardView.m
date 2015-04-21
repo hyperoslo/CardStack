@@ -9,7 +9,6 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 @property (nonatomic) UIView *titleBarView;
 @property (nonatomic) UILabel *titleLabel;
 @property (nonatomic) UISwipeGestureRecognizer *swipeRightRecognizer;
-@property (nonatomic) UIPanGestureRecognizer *panRecognizer;
 
 @end
 

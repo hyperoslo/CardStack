@@ -12,6 +12,7 @@
 @property (nonatomic) UIColor *titleColor;
 @property (nonatomic) UIFont *titleFont;
 @property (nonatomic) NSString *title;
+@property (nonatomic) UIPanGestureRecognizer *panRecognizer;
 
 @property (nonatomic, readonly) CGFloat titleBarHeight;
 

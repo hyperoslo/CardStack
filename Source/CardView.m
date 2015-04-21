@@ -186,8 +186,19 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 
     if (panRecognizer.state == UIGestureRecognizerStateBegan) {
         originalPoint = [panRecognizer locationInView:self.superview];
+        if ([self.delegate respondsToSelector:@selector(cardTitlePanDidStart:)]) {
+            [self.delegate cardTitlePanDidStart:self];
+        }
     } else if (panRecognizer.state == UIGestureRecognizerStateChanged) {
-        
+        CGPoint point = [panRecognizer locationInView:self.superview];
+        CGPoint delta = CGPointMake(point.x - originalPoint.x, point.y - originalPoint.y);
+        if ([self.delegate respondsToSelector:@selector(card:titlePannedByDelta:)]) {
+            [self.delegate card:self titlePannedByDelta:delta];
+        }
+    } else if (panRecognizer.state == UIGestureRecognizerStateCancelled || panRecognizer.state == UIGestureRecognizerStateEnded) {
+        if ([self.delegate respondsToSelector:@selector(cardTitlePanDidFinish:withVerticalVelocity:)]) {
+            [self.delegate cardTitlePanDidFinish:self withVerticalVelocity:[panRecognizer velocityInView:self.superview].y];
+        }
     }
 }
 

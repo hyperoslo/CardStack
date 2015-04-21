@@ -103,6 +103,33 @@ static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
 
 #pragma mark - CardDelegate
 
+- (void)cardTitleTapped:(CardView *)card {
+    NSUInteger index = 0;
+    for (CardView *c in self.cards) {
+        if ([c isEqual:card]) {
+            break;
+        }
+        ++index;
+    }
+
+    if (index == self.currentCardIndex) {
+        if (index > 0) {
+            if (self.isOpen) {
+                [self closeStackAnimated:YES withCompletion:nil];
+            } else {
+                [self openStackAnimated:YES withCompletion:nil];
+            }
+        }
+    } else {
+        if (index < self.cards.count - 1) {
+            self.isOpen = NO;
+        } else {
+            self.isOpen = YES;
+        }
+        [self setCurrentCardIndex:index animated:YES];
+    }
+}
+
 - (void)cardRemoveRequested:(CardView *)card {
     if (self.cards.count < 2) {
         return;
@@ -168,6 +195,76 @@ static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
 }
 
 #pragma mark - Other methods
+
+- (void)openStackAnimated:(BOOL)animated
+           withCompletion:(void(^)())completion {
+    if (self.isAnimating) {
+        return;
+    }
+
+    self.isOpen = YES;
+    if ([self.delegate respondsToSelector:@selector(cardStackControllerWillOpen:)]) {
+        [self.delegate cardStackControllerWillOpen:self];
+    }
+
+    if (animated) {
+        self.isAnimating = YES;
+        [UIView animateWithDuration:0.5 animations:^{
+            [self updateCardLocations];
+        } completion:^(BOOL finished) {
+            self.isAnimating = NO;
+            if ([self.delegate respondsToSelector:@selector(cardStackControllerDidOpen:)]) {
+                [self.delegate cardStackControllerDidOpen:self];
+            }
+            if (completion) {
+                completion();
+            }
+        }];
+    } else {
+        [self updateCardLocations];
+        if ([self.delegate respondsToSelector:@selector(cardStackControllerDidOpen:)]) {
+            [self.delegate cardStackControllerDidOpen:self];
+        }
+        if (completion) {
+            completion();
+        }
+    }
+}
+
+- (void)closeStackAnimated:(BOOL)animated
+            withCompletion:(void(^)())completion {
+    if (self.isAnimating) {
+        return;
+    }
+
+    self.isOpen = NO;
+    if ([self.delegate respondsToSelector:@selector(cardStackControllerWillClose:)]) {
+        [self.delegate cardStackControllerWillClose:self];
+    }
+
+    if (animated) {
+        self.isAnimating = YES;
+        [UIView animateWithDuration:0.5 animations:^{
+            [self updateCardLocations];
+        } completion:^(BOOL finished) {
+            self.isAnimating = NO;
+            if ([self.delegate respondsToSelector:@selector(cardStackControllerDidClose:)]) {
+                [self.delegate cardStackControllerDidClose:self];
+            }
+            if (completion) {
+                completion();
+            }
+        }];
+    } else {
+        [self updateCardLocations];
+        if ([self.delegate respondsToSelector:@selector(cardStackControllerDidClose:)]) {
+            [self.delegate cardStackControllerDidClose:self];
+        }
+        if (completion) {
+            completion();
+        }
+    }
+}
 
 - (void)insertCardWithViewController:(UIViewController *)viewController
                            withTitle:(NSString *)title

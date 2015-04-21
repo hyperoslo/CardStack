@@ -14,6 +14,11 @@
 @property (nonatomic) UIColor *titleColor;
 @property (nonatomic) UIFont *titleFont;
 
+- (void)openStackAnimated:(BOOL)animated
+           withCompletion:(void(^)())completion;
+- (void)closeStackAnimated:(BOOL)animated
+            withCompletion:(void(^)())completion;
+
 - (void)insertCardWithViewController:(UIViewController *)viewController
                            withTitle:(NSString *)title
                  aboveViewController:(UIViewController *)aboveViewController

@@ -45,7 +45,7 @@ static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
 
     [self updateCardScales];
     [self updateCardLocations];
-    
+
     for (NSUInteger i = 0; i < self.cards.count; i++) {
         CardView *card = [self.cards objectAtIndex:i];
         card.panRecognizer.enabled = (i == currentCardIndex);
@@ -112,20 +112,8 @@ static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
         ++index;
     }
 
-    if (index == self.currentCardIndex) {
-        if (index > 0) {
-            if (self.isOpen) {
-                [self closeStackAnimated:YES withCompletion:nil];
-            } else {
-                [self openStackAnimated:YES withCompletion:nil];
-            }
-        }
-    } else {
-        if (index < self.cards.count - 1) {
-            self.isOpen = NO;
-        } else {
-            self.isOpen = YES;
-        }
+    if (index != self.currentCardIndex) {
+        self.isOpen = NO;
         [self setCurrentCardIndex:index animated:YES];
     }
 }
@@ -158,7 +146,7 @@ static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
         CGRect frame = self.originalCardFrame;
         frame.origin.y = y;
         card.frame = frame;
-        [self updateCardLocations];
+        [self updateCardLocationsWhileOpening];
     }
 }
 
@@ -489,6 +477,37 @@ static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
 }
 
 - (void)updateCardLocations {
+    if (self.isOpen) {
+        CGFloat previousTitleBarHeights = 0.0f;
+        for (NSUInteger i = 0; i < self.cards.count; i++) {
+            CardView *card = [self.cards objectAtIndex:i];
+            
+            CGRect frame = card.frame;
+            if (i <= self.currentCardIndex) {
+                frame.origin.y = previousTitleBarHeights + CardStackTopMargin;
+            } else {
+                frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
+            }
+            card.frame = frame;
+            
+            // -1.0f is used to avoid area below the title bar to become slightly visible is some cases (due to rounding errors)
+            previousTitleBarHeights += (card.titleBarHeight * card.scale - 1.0f);
+        }
+    } else {
+        for (NSUInteger i = 0; i < self.cards.count; i++) {
+            CardView *card = [self.cards objectAtIndex:i];
+            CGRect frame = card.frame;
+            if (i <= self.currentCardIndex) {
+                frame.origin.y = 0;
+            } else {
+                frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
+            }
+            card.frame = frame;
+        }
+    }
+}
+
+- (void)updateCardLocationsWhileOpening {
     if (self.currentCardIndex > 0) {
         CGFloat startY = CardStackTopMargin;
         CardView *currentCard = [self.cards objectAtIndex:self.currentCardIndex];

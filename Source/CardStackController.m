@@ -6,7 +6,7 @@ static const CGFloat CardStackTitleBarBackgroundColorOffset = 1.0f / 16.0f;
 static const CGFloat CardStackTopMargin = 10.0f;
 static const CGFloat CardStackDepthOffset = 0.04f;
 static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
-static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 300.0f;
+static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0f;
 
 @interface CardStackController () <CardViewDelegate>
 
@@ -58,7 +58,7 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 300.0
     _currentCardIndex = currentCardIndex;
 
     [self updateCardScales];
-    [self updateCardLocationsAnimated:animated withCompletion:nil];
+    [self updateCardLocationsAnimated:animated];
 
     // disable pan recognizer for cards above to current one to avoid unwanted panning
     for (NSUInteger i = 0; i < self.cards.count; i++) {
@@ -161,17 +161,15 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 300.0
             self.isOpen = NO;
         }
 
-        [self updateCardLocationsAnimatedWithVerticalVelocity:verticalVelocity withCompletion:nil];
+        [self updateCardLocationsAnimatedWithVerticalVelocity:verticalVelocity];
     } else {
         if (verticalVelocity < -CardStackVerticalVelocityLimitWhenMakingCardCurrent) {
             self.isOpen = NO;
 
-            // don't use setter to make sure spring animations will be applied
             _currentCardIndex = self.cards.count - 1;
 
-            [self updateCardLocationsAnimatedWithVerticalVelocity:verticalVelocity withCompletion:^{
-                [self updateCardScales];
-            }];
+            [self updateCardScales];
+            [self updateCardLocationsAnimatedWithVerticalVelocity:verticalVelocity];
         } else {
             POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
             CGRect frame = [self frameForCardAtIndex:card.tag];
@@ -477,37 +475,27 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 300.0
 }
 
 - (void)updateCardLocations {
-    [self updateCardLocationsAnimated:NO withCompletion:nil];
+    [self updateCardLocationsAnimated:NO];
 }
 
-- (void)updateCardLocationsAnimated:(BOOL)animated withCompletion:(void(^)())completion {
+- (void)updateCardLocationsAnimated:(BOOL)animated {
     if (animated) {
-        [self updateCardLocationsAnimatedWithVerticalVelocity:0.0f withCompletion:completion];
+        [self updateCardLocationsAnimatedWithVerticalVelocity:0.0f];
     } else {
         for (NSUInteger i = 0; i < self.cards.count; i++) {
             CardView *card = [self.cards objectAtIndex:i];
             card.frame = [self frameForCardAtIndex:i];
         }
-        if (completion) {
-            completion();
-        }
     }
 }
 
-- (void)updateCardLocationsAnimatedWithVerticalVelocity:(CGFloat)verticalVelocity withCompletion:(void(^)())completion {
-    POPSpringAnimation *animationWithLargestChange;
-    CGFloat largestChange = CGFLOAT_MIN;
+- (void)updateCardLocationsAnimatedWithVerticalVelocity:(CGFloat)verticalVelocity {
     for (NSUInteger i = 0; i < self.cards.count; i++) {
         CardView *card = [self.cards objectAtIndex:i];
         POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
         CGRect frame = [self frameForCardAtIndex:i];
         springAnimation.toValue = [NSValue valueWithCGRect:frame];
         springAnimation.springBounciness = 8;
-        CGFloat change = fabs(card.frame.origin.y - frame.origin.y);
-        if (change > largestChange) {
-            largestChange = change;
-            animationWithLargestChange = springAnimation;
-        }
 
         if (verticalVelocity > 0.0f && i <= self.currentCardIndex) {
             // scale down velocity for upper cards to avoid unwanted spring effect

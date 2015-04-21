@@ -112,7 +112,6 @@ static const CGFloat ExampleMargin = 10.0f;
                                                     UIViewController *viewController = [self.viewControllers objectAtIndex:i];
                                                     viewController.view.tag = i;
                                                 }
-                                                NSLog(@"self.cardStackController.cards = %@", self.cardStackController.cards);
                                             }];
 }
 
@@ -132,7 +131,6 @@ static const CGFloat ExampleMargin = 10.0f;
                                                     UIViewController *viewController = [self.viewControllers objectAtIndex:i];
                                                     viewController.view.tag = i;
                                                 }
-                                                NSLog(@"self.cardStackController.cards = %@", self.cardStackController.cards);
                                             }];
 }
 
@@ -146,7 +144,6 @@ static const CGFloat ExampleMargin = 10.0f;
                                          UIViewController *viewController = [self.viewControllers objectAtIndex:i];
                                          viewController.view.tag = i;
                                      }
-                                     NSLog(@"self.cardStackController.cards = %@", self.cardStackController.cards);
                                  }];
 }
 

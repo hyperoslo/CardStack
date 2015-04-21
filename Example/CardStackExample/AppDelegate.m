@@ -34,7 +34,7 @@ static const CGFloat ExampleMargin = 10.0f;
         if (i < self.cardStackController.cards.count - 1) {
             card.title = [NSString stringWithFormat:@"#%ld", (long)i + 1];
         } else {
-            card.title = @"Tap to open stack";
+            card.title = @"Pull down to open stack";
         }
     }
 
@@ -48,7 +48,7 @@ static const CGFloat ExampleMargin = 10.0f;
 
 - (void)cardStackControllerWillOpen:(CardStackController *)cardStackController {
     CardView *card = [self.cardStackController.cards lastObject];
-    if ([card.title isEqualToString:@"Tap to open stack"]) {
+    if ([card.title isEqualToString:@"Pull down to open stack"]) {
         card.title = [NSString stringWithFormat:@"#%ld", (long)self.cardStackController.cards.count];
     }
 }

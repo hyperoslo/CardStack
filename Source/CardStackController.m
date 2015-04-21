@@ -1,14 +1,17 @@
 #import "CardStackController.h"
 #import "CardView.h"
+#import "POP.h"
 
 static const CGFloat CardStackTitleBarBackgroundColorOffset = 1.0f / 16.0f;
 static const CGFloat CardStackTopMargin = 10.0f;
 static const CGFloat CardStackDepthOffset = 0.04f;
+static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
 
 @interface CardStackController () <CardViewDelegate>
 
 @property (nonatomic) BOOL isAnimating;
 @property (nonatomic) BOOL isOpen;
+@property (nonatomic) CGRect originalCardFrame;
 
 @end
 
@@ -138,6 +141,52 @@ static const CGFloat CardStackDepthOffset = 0.04f;
     [self removeCardAtIndex:index
                    animated:YES
              withCompletion:nil];
+}
+
+- (void)cardTitlePanDidStart:(CardView *)card {
+    self.originalCardFrame = card.frame;
+}
+
+- (void)card:(CardView *)card titlePannedByDelta:(CGPoint)delta {
+    CGFloat y = self.originalCardFrame.origin.y + delta.y * 0.75;
+    if (y >= 0.0f) {
+        CGRect frame = self.originalCardFrame;
+        frame.origin.y = y;
+        card.frame = frame;
+        [self updateCardLocations];
+    }
+}
+
+- (void)cardTitlePanDidFinish:(CardView *)card withVerticalVelocity:(CGFloat)verticalVelocity {
+    CGFloat heightAboveCurrentCardWhenOpen = CardStackTopMargin;
+    for (NSUInteger i = 0; i < self.currentCardIndex - 1; i++) {
+        CardView *card = [self.cards objectAtIndex:i];
+        heightAboveCurrentCardWhenOpen += card.titleBarHeight * card.scale;
+    }
+
+    self.isOpen = (card.frame.origin.y > heightAboveCurrentCardWhenOpen * CardStackOpenIfLargeThanPercent);
+
+    // if user flicked upwards, close the stack
+    if (verticalVelocity < 0.0f) {
+        self.isOpen = NO;
+    }
+
+    CGFloat previousTitleBarHeights = CardStackTopMargin;
+    for (NSUInteger i = 0; i < self.currentCardIndex + 1; i++) {
+        CardView *card = [self.cards objectAtIndex:i];
+        POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
+        CGRect frame = card.frame;
+        frame.origin.y = (self.isOpen ? previousTitleBarHeights : 0.0f);
+        springAnimation.toValue = [NSValue valueWithCGRect:frame];
+        springAnimation.springBounciness = 8;
+
+        // scale down velocity for upper cards to avoid unwanted spring effect
+        CGFloat springVelocity = (verticalVelocity * card.scale) * ((CGFloat)i / (CGFloat)(self.currentCardIndex + 1));
+        springAnimation.velocity = [NSValue valueWithCGRect:CGRectMake(0, springVelocity, 0, 0)];
+
+        [card pop_addAnimation:springAnimation forKey:@"frame"];
+        previousTitleBarHeights += card.titleBarHeight * card.scale;
+    }
 }
 
 #pragma mark - Other methods
@@ -435,34 +484,26 @@ static const CGFloat CardStackDepthOffset = 0.04f;
 }
 
 - (void)updateCardLocations {
-    if (self.isOpen) {
-        CGFloat previousTitleBarHeights = 0.0f;
-        for (NSUInteger i = 0; i < self.cards.count; i++) {
-            CardView *card = [self.cards objectAtIndex:i];
-
-            CGRect frame = card.frame;
-            if (i <= self.currentCardIndex) {
-                frame.origin.y = previousTitleBarHeights + CardStackTopMargin;
-            } else {
-                frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
-            }
-            card.frame = frame;
-
-            // -1.0f is used to avoid area below the title bar to become slightly visible is some cases (due to rounding errors)
-            previousTitleBarHeights += (card.titleBarHeight * card.scale - 1.0f);
+    if (self.currentCardIndex > 0) {
+        CGFloat startY = CardStackTopMargin;
+        CardView *currentCard = [self.cards objectAtIndex:self.currentCardIndex];
+        CGFloat endY = currentCard.frame.origin.y;
+        CGFloat currentY = startY;
+        CGFloat incrementY = (endY - startY) / self.currentCardIndex;
+        for (NSUInteger i = 0; i < self.currentCardIndex; i++) {
+            currentCard = [self.cards objectAtIndex:i];
+            CGRect frame = currentCard.frame;
+            frame.origin.y = currentY;
+            currentCard.frame = frame;
+            currentY = currentY + incrementY;
         }
-    } else {
-        for (NSUInteger i = 0; i < self.cards.count; i++) {
-            CardView *card = [self.cards objectAtIndex:i];
+    }
 
-            CGRect frame = card.frame;
-            if (i <= self.currentCardIndex) {
-                frame.origin.y = 0;
-            } else {
-                frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
-            }
-            card.frame = frame;
-        }
+    for (NSUInteger i = self.currentCardIndex; i < self.cards.count - 1; i++) {
+        CardView *card = [self.cards objectAtIndex:i];
+        CGRect frame = card.frame;
+        frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
+        card.frame = frame;
     }
 }
 

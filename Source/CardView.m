@@ -8,7 +8,6 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 @property (nonatomic) UIView *contentView;
 @property (nonatomic) UIView *titleBarView;
 @property (nonatomic) UILabel *titleLabel;
-@property (nonatomic) UITapGestureRecognizer *tapRecognizer;
 @property (nonatomic) UISwipeGestureRecognizer *swipeRightRecognizer;
 @property (nonatomic) UIPanGestureRecognizer *panRecognizer;
 
@@ -92,7 +91,6 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     _titleBarView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.titleBarHeight)];
     _titleBarView.backgroundColor = [UIColor orangeColor];
     _titleBarView.userInteractionEnabled = YES;
-    [_titleBarView addGestureRecognizer:self.tapRecognizer];
     [_titleBarView addGestureRecognizer:self.swipeRightRecognizer];
     [_titleBarView addGestureRecognizer:self.panRecognizer];
 
@@ -108,14 +106,6 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     _titleLabel.font = self.titleFont;
 
     return _titleLabel;
-}
-
-- (UITapGestureRecognizer *)tapRecognizer {
-    if (_tapRecognizer) return _tapRecognizer;
-
-    _tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
-
-    return _tapRecognizer;
 }
 
 - (UISwipeGestureRecognizer *)swipeRightRecognizer {
@@ -168,12 +158,6 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 }
 
 #pragma mark - Gesture recognizers
-
-- (void)tapAction:(UITapGestureRecognizer *)tapRecognizer {
-    if ([self.delegate respondsToSelector:@selector(cardTitleTapped:)]) {
-        [self.delegate cardTitleTapped:self];
-    }
-}
 
 - (void)swipeRightAction:(UISwipeGestureRecognizer *)swipeRightRecognizer {
     if ([self.delegate respondsToSelector:@selector(cardRemoveRequested:)]) {

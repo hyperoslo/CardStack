@@ -34,11 +34,7 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
     self.cardStackController.viewControllers = self.viewControllers;
     for (NSUInteger i = 0; i < self.cardStackController.cards.count; i++) {
         CardView *card = [self.cardStackController.cards objectAtIndex:i];
-        if (i < self.cardStackController.cards.count - 1) {
-            card.title = [NSString stringWithFormat:@"#%ld", (long)i + 1];
-        } else {
-            card.title = @"Pull down to open stack";
-        }
+        card.title = [NSString stringWithFormat:@"#%ld", (long)i + 1];
     }
 
     self.searchViewController = [[UIViewController alloc] init];
@@ -90,24 +86,37 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
         make.top.equalTo(insertAboveButton.mas_bottom).with.offset(ExampleMargin);
         make.centerX.equalTo(viewController.view.mas_centerX);
     }];
-
-    UIButton *removeButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, ExampleButtonWidth, ExampleButtonHeight)];
-    [removeButton setTitleColor:[UIColor orangeColor] forState:UIControlStateNormal];
-    [removeButton setTitle:@"Remove this card" forState:UIControlStateNormal];
-    [removeButton addTarget:self action:@selector(removeAction:) forControlEvents:UIControlEventTouchUpInside];
-    [viewController.view addSubview:removeButton];
-    [removeButton mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(insertBelowButton.mas_bottom).with.offset(ExampleMargin);
+    
+    UILabel *openLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, ExampleButtonWidth, ExampleButtonHeight)];
+    openLabel.text = @"Pull down on title bar to open stack";
+    openLabel.textAlignment = NSTextAlignmentCenter;
+    openLabel.font = [UIFont systemFontOfSize:13.0f];
+    openLabel.textColor = [UIColor darkGrayColor];
+    [viewController.view addSubview:openLabel];
+    [openLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(insertBelowButton.mas_bottom).with.offset(3 * ExampleMargin);
+        make.centerX.equalTo(viewController.view.mas_centerX);
+    }];
+    
+    UILabel *tapLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, ExampleButtonWidth, ExampleButtonHeight)];
+    tapLabel.text = @"Tap on title bar to select";
+    tapLabel.textAlignment = NSTextAlignmentCenter;
+    tapLabel.font = [UIFont systemFontOfSize:13.0f];
+    tapLabel.textColor = [UIColor darkGrayColor];
+    [viewController.view addSubview:tapLabel];
+    [tapLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(openLabel.mas_bottom).with.offset(2 * ExampleMargin);
         make.centerX.equalTo(viewController.view.mas_centerX);
     }];
 
-    UIButton *toggleSearchBarButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, ExampleButtonWidth, ExampleButtonHeight)];
-    [toggleSearchBarButton setTitleColor:[UIColor orangeColor] forState:UIControlStateNormal];
-    [toggleSearchBarButton setTitle:@"Toggle search view controller" forState:UIControlStateNormal];
-    [toggleSearchBarButton addTarget:self action:@selector(toggleSearchBarAction:) forControlEvents:UIControlEventTouchUpInside];
-    [viewController.view addSubview:toggleSearchBarButton];
-    [toggleSearchBarButton mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(removeButton.mas_bottom).with.offset(ExampleMargin);
+    UILabel *removeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, ExampleButtonWidth, ExampleButtonHeight)];
+    removeLabel.text = @"Swipe right on title bar to remove a card";
+    removeLabel.textAlignment = NSTextAlignmentCenter;
+    removeLabel.font = [UIFont systemFontOfSize:13.0f];
+    removeLabel.textColor = [UIColor darkGrayColor];
+    [viewController.view addSubview:removeLabel];
+    [removeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(tapLabel.mas_bottom).with.offset(2 * ExampleMargin);
         make.centerX.equalTo(viewController.view.mas_centerX);
     }];
 
@@ -152,25 +161,6 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
                                                     viewController.view.tag = i;
                                                 }
                                             }];
-}
-
-- (void)removeAction:(UIButton *)button {
-    NSInteger index = button.superview.tag;
-    [self.viewControllers removeObjectAtIndex:index];
-    [self.cardStackController removeCardAtIndex:index
-                                       animated:YES
-                                 withCompletion:^{
-                                     for (NSUInteger i = 0; i < self.viewControllers.count; i++) {
-                                         UIViewController *viewController = [self.viewControllers objectAtIndex:i];
-                                         viewController.view.tag = i;
-                                     }
-                                 }];
-}
-
-- (void)toggleSearchBarAction:(UIButton *)button {
-    [self.cardStackController setIsSeachViewControllerHidden:!self.cardStackController.isSeachViewControllerHidden
-                                                    animated:YES
-                                              withCompletion:nil];
 }
 
 @end

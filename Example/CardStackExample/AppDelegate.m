@@ -63,15 +63,6 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
     return YES;
 }
 
-#pragma mark - CardStackControllerDelegate
-
-- (void)cardStackControllerWillOpen:(CardStackController *)cardStackController {
-    CardView *card = [self.cardStackController.cards lastObject];
-    if ([card.title isEqualToString:@"Pull down to open stack"]) {
-        card.title = [NSString stringWithFormat:@"#%ld", (long)self.cardStackController.cards.count];
-    }
-}
-
 #pragma mark - Other methods
 
 - (UIViewController *)createNewTestViewControllerWithTag:(NSInteger)tag {

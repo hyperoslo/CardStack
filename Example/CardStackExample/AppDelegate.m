@@ -86,7 +86,7 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
         make.top.equalTo(insertAboveButton.mas_bottom).with.offset(ExampleMargin);
         make.centerX.equalTo(viewController.view.mas_centerX);
     }];
-    
+
     UILabel *openLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, ExampleButtonWidth, ExampleButtonHeight)];
     openLabel.text = @"Pull down on title bar to open stack";
     openLabel.textAlignment = NSTextAlignmentCenter;
@@ -97,7 +97,7 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
         make.top.equalTo(insertBelowButton.mas_bottom).with.offset(3 * ExampleMargin);
         make.centerX.equalTo(viewController.view.mas_centerX);
     }];
-    
+
     UILabel *tapLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, ExampleButtonWidth, ExampleButtonHeight)];
     tapLabel.text = @"Tap on title bar to select";
     tapLabel.textAlignment = NSTextAlignmentCenter;
@@ -153,7 +153,7 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
     [self.cardStackController insertCardWithViewController:viewController
                                                  withTitle:title
                                        belowViewController:belowViewController
-                                               makeCurrent:NO
+                                               makeCurrent:YES
                                                   animated:YES
                                             withCompletion:^{
                                                 for (NSUInteger i = 0; i < self.viewControllers.count; i++) {

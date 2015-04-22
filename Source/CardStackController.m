@@ -59,12 +59,6 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0
 
     [self updateCardScales];
     [self updateCardLocationsAnimated:animated];
-
-    // disable pan recognizer for cards above to current one to avoid unwanted panning
-    for (NSUInteger i = 0; i < self.cards.count; i++) {
-        CardView *card = [self.cards objectAtIndex:i];
-        card.panRecognizer.enabled = (i >= currentCardIndex);
-    }
 }
 
 - (void)setTitleBarBackgroundColor:(UIColor *)titleBarBackgroundColor {
@@ -110,7 +104,8 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0
 - (void)cardTitleTapped:(CardView *)card {
     if (card.tag != self.currentCardIndex) {
         self.isOpen = NO;
-        [self setCurrentCardIndex:card.tag animated:YES];
+        [self setCurrentCardIndex:card.tag
+                         animated:YES];
     }
 }
 
@@ -118,7 +113,6 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0
     if (self.cards.count < 2) {
         return;
     }
-
     [self removeCardAtIndex:card.tag
                    animated:YES
              withCompletion:nil];
@@ -129,6 +123,11 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0
 }
 
 - (void)card:(CardView *)card titlePannedByDelta:(CGPoint)delta {
+    if (card.tag != self.currentCardIndex &&
+        card.tag != self.cards.count - 1) {
+        return;
+    }
+
     CGFloat y = self.originalCardFrame.origin.y + delta.y;
     if (y >= 0.0f) {
         CGRect frame = self.originalCardFrame;
@@ -139,23 +138,26 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0
 }
 
 - (void)cardTitlePanDidFinish:(CardView *)card withVerticalVelocity:(CGFloat)verticalVelocity {
+    if (card.tag != self.currentCardIndex &&
+        card.tag != self.cards.count - 1) {
+        return;
+    }
+
     if (card.tag == self.currentCardIndex) {
-        CGFloat heightAboveCurrentCardWhenOpen = CardStackTopMargin;
-        for (NSUInteger i = 0; i < self.currentCardIndex - 1; i++) {
-            CardView *card = [self.cards objectAtIndex:i];
-            heightAboveCurrentCardWhenOpen += card.titleBarHeight * card.scale;
-        }
-
-        self.isOpen = (card.frame.origin.y > heightAboveCurrentCardWhenOpen * CardStackOpenIfLargeThanPercent);
-
-        // if user flicked upwards, close the stack
         if (verticalVelocity < 0.0f) {
             self.isOpen = NO;
+        } else {
+            CGFloat heightAboveCurrentCardWhenOpen = CardStackTopMargin;
+            for (NSUInteger i = 0; i < self.currentCardIndex - 1; i++) {
+                CardView *card = [self.cards objectAtIndex:i];
+                heightAboveCurrentCardWhenOpen += card.titleBarHeight * card.scale;
+            }
+            self.isOpen = (card.frame.origin.y > heightAboveCurrentCardWhenOpen * CardStackOpenIfLargeThanPercent);
         }
-
         [self updateCardLocationsAnimatedWithVerticalVelocity:verticalVelocity];
-    } else {
-        if (verticalVelocity < 0.0f && fabs(verticalVelocity) > CardStackVerticalVelocityLimitWhenMakingCardCurrent) {
+    } else if (card.tag == self.cards.count - 1) {
+        if (verticalVelocity < 0.0f &&
+            fabs(verticalVelocity) > CardStackVerticalVelocityLimitWhenMakingCardCurrent) {
             // apply animation only to the card being moved (the rest remain stationary)
             POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
             CGRect frame = [self frameForCardAtIndex:card.tag];
@@ -326,7 +328,6 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0
     _viewControllers = [mutableViewControllers copy];
 
     __block CardView *card = [self.cards objectAtIndex:index];
-
     NSMutableArray *mutableCards = [self.cards mutableCopy];
     [mutableCards removeObjectAtIndex:index];
     self.cards = [mutableCards copy];
@@ -347,7 +348,7 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0
             frame.origin.x = frame.origin.x + self.view.bounds.size.width;
             card.frame = frame;
         } completion:^(BOOL finished) {
-            // removal is diferred, so a proper removal animation could be executed
+            // removal from superview is diferred to make sure a proper removal animation is visible
             [card removeFromSuperview];
 
             if (completion) {
@@ -422,13 +423,11 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0
         CGRect frame = [self frameForCardAtIndex:i];
         springAnimation.toValue = [NSValue valueWithCGRect:frame];
         springAnimation.springBounciness = 8;
-
         if (verticalVelocity > 0.0f && i <= self.currentCardIndex) {
-            // scale down velocity for upper cards to avoid unwanted spring effect
+            // scale down velocity for upper cards to avoid unwanted spring effect for cards near to the top
             CGFloat springVelocity = (verticalVelocity * card.scale) * ((CGFloat)i / (CGFloat)(self.currentCardIndex + 1));
             springAnimation.velocity = [NSValue valueWithCGRect:CGRectMake(0, springVelocity, 0, 0)];
         }
-
         [card pop_addAnimation:springAnimation forKey:@"frame"];
     }
 }
@@ -472,6 +471,7 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0
             frame.origin.y = 0;
         }
     } else if (index > self.currentCardIndex && index < self.cards.count - 1) {
+        // cards at the bottom but behind the last card will be positioned outside of the visible area, so their title bar won't show up when the last card is being moved
         CardView *card = [self.cards objectAtIndex:index];
         frame = card.frame;
         frame.origin.y = self.view.bounds.size.height;

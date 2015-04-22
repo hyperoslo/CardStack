@@ -263,7 +263,8 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
             return;
         }
 
-        if (velocity.x < CardStackVerticalVelocityLimitWhenRemovingCard || self.cards.count < 2) {
+        BOOL isQuickRightFlick = (velocity.x > CardStackVerticalVelocityLimitWhenRemovingCard);
+        if (!isQuickRightFlick || self.cards.count < 2) {
             // apply animation only to the card being moved (the rest remain stationary)
             POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
             CGRect frame = self.originalCardFrame;
@@ -534,7 +535,8 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
         CGRect frame = [self frameForCardAtIndex:i];
         springAnimation.toValue = [NSValue valueWithCGRect:frame];
         springAnimation.springBounciness = 8;
-        if (verticalVelocity > 0.0f && i <= self.currentCardIndex) {
+        BOOL hasVelocityAndCardIsCurrentOrAbove = (verticalVelocity > 0.0f && i <= self.currentCardIndex);
+        if (hasVelocityAndCardIsCurrentOrAbove) {
             // scale down velocity for upper cards to avoid unwanted spring effect for cards near to the top
             CGFloat springVelocity = (verticalVelocity * card.scale) * ((CGFloat)i / (CGFloat)(self.currentCardIndex + 1));
             springAnimation.velocity = [NSValue valueWithCGRect:CGRectMake(0, springVelocity, 0, 0)];
@@ -563,6 +565,7 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
 - (CGRect)frameForCardAtIndex:(NSUInteger)index {
     CGRect frame;
 
+    BOOL isCardAtTheBottomAndCoveredByTheLastCard = (index > self.currentCardIndex && index < self.cards.count - 1);
     if (index <= self.currentCardIndex) {
         if (self.isOpen) {
             CGFloat previousTitleBarHeights = CardStackTopMargin;
@@ -581,7 +584,7 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
             frame = card.frame;
             frame.origin.y = 0;
         }
-    } else if (index > self.currentCardIndex && index < self.cards.count - 1) {
+    } else if (isCardAtTheBottomAndCoveredByTheLastCard) {
         // cards at the bottom but behind the last card will be positioned outside of the visible area, so their title bar won't show up when the last card is being moved
         CardView *card = [self.cards objectAtIndex:index];
         frame = card.frame;

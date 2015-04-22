@@ -7,12 +7,15 @@ static const CGFloat ExampleButtonWidth = 320.0f;
 static const CGFloat ExampleButtonHeight = 44.0f;
 static const CGFloat ExampleTopMargin = 64.0f;
 static const CGFloat ExampleMargin = 10.0f;
+static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
 
 @interface AppDelegate () <CardStackControllerDelegate>
 
 @property (nonatomic) CardStackController *cardStackController;
 @property (nonatomic) NSMutableArray *viewControllers;
 @property (nonatomic) NSUInteger numberOfCardsCreated;
+
+@property (nonatomic) UIViewController *searchViewController;
 
 @end
 
@@ -37,6 +40,22 @@ static const CGFloat ExampleMargin = 10.0f;
             card.title = @"Pull down to open stack";
         }
     }
+
+    self.searchViewController = [[UIViewController alloc] init];
+    self.searchViewController.view.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, ExampleSearchViewControllerHeight);
+    self.searchViewController.view.backgroundColor = [UIColor redColor];
+
+    UILabel *searchLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, ExampleButtonHeight)];
+    searchLabel.text = @"Search view controller here";
+    searchLabel.textColor = [UIColor whiteColor];
+    searchLabel.font = [UIFont systemFontOfSize:16.0f];
+    searchLabel.textAlignment = NSTextAlignmentCenter;
+    [self.searchViewController.view addSubview:searchLabel];
+    [searchLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.center.equalTo(self.searchViewController.view);
+    }];
+
+    self.cardStackController.searchViewController = self.searchViewController;
 
     self.window.rootViewController = self.cardStackController;
     self.window.backgroundColor = [UIColor clearColor];
@@ -88,6 +107,16 @@ static const CGFloat ExampleMargin = 10.0f;
     [viewController.view addSubview:removeButton];
     [removeButton mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.equalTo(insertBelowButton.mas_bottom).with.offset(ExampleMargin);
+        make.centerX.equalTo(viewController.view.mas_centerX);
+    }];
+
+    UIButton *toggleSearchBarButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, ExampleButtonWidth, ExampleButtonHeight)];
+    [toggleSearchBarButton setTitleColor:[UIColor orangeColor] forState:UIControlStateNormal];
+    [toggleSearchBarButton setTitle:@"Toggle search view controller" forState:UIControlStateNormal];
+    [toggleSearchBarButton addTarget:self action:@selector(toggleSearchBarAction:) forControlEvents:UIControlEventTouchUpInside];
+    [viewController.view addSubview:toggleSearchBarButton];
+    [toggleSearchBarButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(removeButton.mas_bottom).with.offset(ExampleMargin);
         make.centerX.equalTo(viewController.view.mas_centerX);
     }];
 
@@ -145,6 +174,12 @@ static const CGFloat ExampleMargin = 10.0f;
                                          viewController.view.tag = i;
                                      }
                                  }];
+}
+
+- (void)toggleSearchBarAction:(UIButton *)button {
+    [self.cardStackController setIsSeachViewControllerHidden:!self.cardStackController.isSeachViewControllerHidden
+                                                    animated:YES
+                                              withCompletion:nil];
 }
 
 @end

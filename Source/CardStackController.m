@@ -7,6 +7,7 @@ static const CGFloat CardStackTopMargin = 10.0f;
 static const CGFloat CardStackDepthOffset = 0.04f;
 static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
 static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0f;
+static const CGFloat CardStackTitleBarHeightWhenSearchIsShown = 8.0f;
 
 @interface CardStackController () <CardViewDelegate>
 
@@ -20,6 +21,15 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0
 
 @synthesize titleBarBackgroundColor = _titleBarBackgroundColor;
 @synthesize titleFont = _titleFont;
+
+- (instancetype)init {
+    self = [super init];
+    if (!self) return nil;
+
+    self.isSeachViewControllerHidden = YES;
+
+    return self;
+}
 
 #pragma mark - Setters
 
@@ -70,6 +80,54 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0
     _titleFont = titleFont;
     for (CardView *card in self.cards) {
         card.titleFont = titleFont;
+    }
+}
+
+- (void)setSearchViewController:(UIViewController *)searchViewController {
+    [_searchViewController.view removeFromSuperview];
+
+    _searchViewController = searchViewController;
+    [self.view addSubview:searchViewController.view];
+
+    CGRect frame = searchViewController.view.frame;
+    frame.origin.y = -searchViewController.view.frame.size.height;
+    searchViewController.view.frame = frame;
+}
+
+- (void)setIsSeachViewControllerHidden:(BOOL)isSeachViewControllerHidden {
+    [self setIsSeachViewControllerHidden:isSeachViewControllerHidden
+                                animated:NO
+                          withCompletion:nil];
+}
+
+- (void)setIsSeachViewControllerHidden:(BOOL)isSeachViewControllerHidden
+                              animated:(BOOL)animated
+                        withCompletion:(void(^)())completion {
+    if (!isSeachViewControllerHidden && !self.searchViewController) {
+        return;
+    }
+
+    _isSeachViewControllerHidden = isSeachViewControllerHidden;
+    if (animated) {
+        [UIView animateWithDuration:0.5 animations:^{
+            [self updateCardLocations];
+        } completion:^(BOOL finished) {
+            if (completion) {
+                completion();
+            }
+        }];
+    } else {
+        [self updateCardLocations];
+        if (completion) {
+            completion();
+        }
+    }
+}
+
+- (void)setIsOpen:(BOOL)isOpen {
+    _isOpen = isOpen;
+    if (isOpen && !self.isSeachViewControllerHidden) {
+        _isSeachViewControllerHidden = YES;
     }
 }
 

@@ -14,21 +14,30 @@
 @property (nonatomic) UIColor *titleColor;
 @property (nonatomic) UIFont *titleFont;
 
+@property (nonatomic) UIViewController *searchViewController;
+@property (nonatomic) BOOL isSeachViewControllerHidden;
+
 - (void)insertCardWithViewController:(UIViewController *)viewController
                            withTitle:(NSString *)title
                  aboveViewController:(UIViewController *)aboveViewController
                          makeCurrent:(BOOL)makeCurrent
                             animated:(BOOL)animated
                       withCompletion:(void(^)())completion;
+
 - (void)insertCardWithViewController:(UIViewController *)viewController
                            withTitle:(NSString *)title
                  belowViewController:(UIViewController *)belowViewController
                          makeCurrent:(BOOL)makeCurrent
                             animated:(BOOL)animated
                       withCompletion:(void(^)())completion;
+
 - (void)removeCardAtIndex:(NSUInteger)index
                  animated:(BOOL)animated
            withCompletion:(void(^)())completion;
+
+- (void)setIsSeachViewControllerHidden:(BOOL)isSeachViewControllerHidden
+                              animated:(BOOL)animated
+                        withCompletion:(void(^)())completion;
 
 @end
 

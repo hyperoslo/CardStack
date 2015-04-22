@@ -119,15 +119,7 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0
         return;
     }
 
-    NSUInteger index = 0;
-    for (CardView *c in self.cards) {
-        if ([c isEqual:card]) {
-            break;
-        }
-        ++index;
-    }
-
-    [self removeCardAtIndex:index
+    [self removeCardAtIndex:card.tag
                    animated:YES
              withCompletion:nil];
 }
@@ -163,94 +155,28 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0
 
         [self updateCardLocationsAnimatedWithVerticalVelocity:verticalVelocity];
     } else {
-        if (verticalVelocity < -CardStackVerticalVelocityLimitWhenMakingCardCurrent) {
-            self.isOpen = NO;
-
-            _currentCardIndex = self.cards.count - 1;
-
-            [self updateCardScales];
-            [self updateCardLocationsAnimatedWithVerticalVelocity:verticalVelocity];
-        } else {
+        if (verticalVelocity < 0.0f && fabs(verticalVelocity) > CardStackVerticalVelocityLimitWhenMakingCardCurrent) {
+            // apply animation only to the card being moved (the rest remain stationary)
             POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
             CGRect frame = [self frameForCardAtIndex:card.tag];
+            frame.origin.y = 0;
             springAnimation.toValue = [NSValue valueWithCGRect:frame];
             springAnimation.springBounciness = 8;
+            springAnimation.velocity = [NSValue valueWithCGRect:CGRectMake(0, verticalVelocity, 0, 0)];
+            springAnimation.completionBlock = ^(POPAnimation *anim, BOOL finished) {
+                self.isOpen = NO;
+                self.currentCardIndex = self.cards.count - 1;
+                [self updateCardScales];
+                [self updateCardLocations];
+            };
             [card pop_addAnimation:springAnimation forKey:@"frame"];
+        } else {
+            [self updateCardLocationsAnimated:YES];
         }
     }
 }
 
 #pragma mark - Other methods
-
-- (void)openStackAnimated:(BOOL)animated
-           withCompletion:(void(^)())completion {
-    if (self.isAnimating) {
-        return;
-    }
-
-    self.isOpen = YES;
-    if ([self.delegate respondsToSelector:@selector(cardStackControllerWillOpen:)]) {
-        [self.delegate cardStackControllerWillOpen:self];
-    }
-
-    if (animated) {
-        self.isAnimating = YES;
-        [UIView animateWithDuration:0.5 animations:^{
-            [self updateCardLocations];
-        } completion:^(BOOL finished) {
-            self.isAnimating = NO;
-            if ([self.delegate respondsToSelector:@selector(cardStackControllerDidOpen:)]) {
-                [self.delegate cardStackControllerDidOpen:self];
-            }
-            if (completion) {
-                completion();
-            }
-        }];
-    } else {
-        [self updateCardLocations];
-        if ([self.delegate respondsToSelector:@selector(cardStackControllerDidOpen:)]) {
-            [self.delegate cardStackControllerDidOpen:self];
-        }
-        if (completion) {
-            completion();
-        }
-    }
-}
-
-- (void)closeStackAnimated:(BOOL)animated
-            withCompletion:(void(^)())completion {
-    if (self.isAnimating) {
-        return;
-    }
-
-    self.isOpen = NO;
-    if ([self.delegate respondsToSelector:@selector(cardStackControllerWillClose:)]) {
-        [self.delegate cardStackControllerWillClose:self];
-    }
-
-    if (animated) {
-        self.isAnimating = YES;
-        [UIView animateWithDuration:0.5 animations:^{
-            [self updateCardLocations];
-        } completion:^(BOOL finished) {
-            self.isAnimating = NO;
-            if ([self.delegate respondsToSelector:@selector(cardStackControllerDidClose:)]) {
-                [self.delegate cardStackControllerDidClose:self];
-            }
-            if (completion) {
-                completion();
-            }
-        }];
-    } else {
-        [self updateCardLocations];
-        if ([self.delegate respondsToSelector:@selector(cardStackControllerDidClose:)]) {
-            [self.delegate cardStackControllerDidClose:self];
-        }
-        if (completion) {
-            completion();
-        }
-    }
-}
 
 - (void)insertCardWithViewController:(UIViewController *)viewController
                            withTitle:(NSString *)title
@@ -522,13 +448,6 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0
             currentY = currentY + incrementY;
         }
     }
-
-    for (NSUInteger i = self.currentCardIndex + 1; i < self.cards.count - 1; i++) {
-        CardView *card = [self.cards objectAtIndex:i];
-        CGRect frame = card.frame;
-        frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
-        card.frame = frame;
-    }
 }
 
 - (CGRect)frameForCardAtIndex:(NSUInteger)index {
@@ -552,6 +471,10 @@ static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0
             frame = card.frame;
             frame.origin.y = 0;
         }
+    } else if (index > self.currentCardIndex && index < self.cards.count - 1) {
+        CardView *card = [self.cards objectAtIndex:index];
+        frame = card.frame;
+        frame.origin.y = self.view.bounds.size.height;
     } else {
         CardView *card = [self.cards objectAtIndex:index];
         frame = card.frame;

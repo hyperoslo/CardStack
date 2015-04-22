@@ -9,9 +9,6 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 @property (nonatomic) UIView *titleBarView;
 @property (nonatomic) UILabel *titleLabel;
 @property (nonatomic) UITapGestureRecognizer *tapRecognizer;
-@property (nonatomic) UISwipeGestureRecognizer *swipeRightRecognizer;
-@property (nonatomic) UISwipeGestureRecognizer *swipeUpRecognizer;
-@property (nonatomic) UISwipeGestureRecognizer *swipeDownRecognizer;
 
 @end
 
@@ -94,9 +91,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     _titleBarView.backgroundColor = [UIColor orangeColor];
     _titleBarView.userInteractionEnabled = YES;
     [_titleBarView addGestureRecognizer:self.tapRecognizer];
-    [_titleBarView addGestureRecognizer:self.swipeRightRecognizer];
-    [_titleBarView addGestureRecognizer:self.swipeUpRecognizer];
-    [_titleBarView addGestureRecognizer:self.swipeDownRecognizer];
+    [_titleBarView addGestureRecognizer:self.panRecognizer];
 
     return _titleBarView;
 }
@@ -120,31 +115,12 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     return _tapRecognizer;
 }
 
-- (UISwipeGestureRecognizer *)swipeRightRecognizer {
-    if (_swipeRightRecognizer) return _swipeRightRecognizer;
+- (UIPanGestureRecognizer *)panRecognizer {
+    if (_panRecognizer) return _panRecognizer;
 
-    _swipeRightRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeRightAction:)];
-    _swipeRightRecognizer.direction = UISwipeGestureRecognizerDirectionRight;
+    _panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panAction:)];
 
-    return _swipeRightRecognizer;
-}
-
-- (UISwipeGestureRecognizer *)swipeUpRecognizer {
-    if (_swipeUpRecognizer) return _swipeUpRecognizer;
-
-    _swipeUpRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeUpAction:)];
-    _swipeUpRecognizer.direction = UISwipeGestureRecognizerDirectionUp;
-
-    return _swipeUpRecognizer;
-}
-
-- (UISwipeGestureRecognizer *)swipeDownRecognizer {
-    if (_swipeDownRecognizer) return _swipeDownRecognizer;
-
-    _swipeDownRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDownAction:)];
-    _swipeDownRecognizer.direction = UISwipeGestureRecognizerDirectionDown;
-
-    return _swipeDownRecognizer;
+    return _panRecognizer;
 }
 
 #pragma mark - Setters
@@ -187,21 +163,33 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     }
 }
 
-- (void)swipeRightAction:(UISwipeGestureRecognizer *)swipeRightRecognizer {
-    if ([self.delegate respondsToSelector:@selector(cardRemoveRequested:)]) {
-        [self.delegate cardRemoveRequested:self];
-    }
-}
+- (void)panAction:(UIPanGestureRecognizer *)panRecognizer {
+    static CGPoint originalPoint;
 
-- (void)swipeUpAction:(UISwipeGestureRecognizer *)swipeRightRecognizer {
-    if ([self.delegate respondsToSelector:@selector(cardTitleSwipeUp:)]) {
-        [self.delegate cardTitleSwipeUp:self];
-    }
-}
-
-- (void)swipeDownAction:(UISwipeGestureRecognizer *)swipeRightRecognizer {
-    if ([self.delegate respondsToSelector:@selector(cardTitleSwipeDown:)]) {
-        [self.delegate cardTitleSwipeDown:self];
+    switch (panRecognizer.state) {
+        case UIGestureRecognizerStateBegan:
+            originalPoint = [panRecognizer locationInView:self.superview];
+            if ([self.delegate respondsToSelector:@selector(cardTitlePanDidStart:)]) {
+                [self.delegate cardTitlePanDidStart:self];
+            }
+            break;
+        case UIGestureRecognizerStateChanged: {
+            CGPoint point = [panRecognizer locationInView:self.superview];
+            CGPoint delta = CGPointMake(point.x - originalPoint.x, point.y - originalPoint.y);
+            if ([self.delegate respondsToSelector:@selector(card:titlePannedByDelta:)]) {
+                [self.delegate card:self titlePannedByDelta:delta];
+            }
+            break;
+        }
+        case UIGestureRecognizerStateCancelled:
+        case UIGestureRecognizerStateEnded:
+            if ([self.delegate respondsToSelector:@selector(cardTitlePanDidFinish:withVelocity:)]) {
+                [self.delegate cardTitlePanDidFinish:self withVelocity:[panRecognizer velocityInView:self.superview]];
+            }
+            break;
+        case UIGestureRecognizerStatePossible:
+        case UIGestureRecognizerStateFailed:
+            break;
     }
 }
 

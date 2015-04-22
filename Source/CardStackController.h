@@ -17,12 +17,6 @@
 @property (nonatomic) UIViewController *searchViewController;
 @property (nonatomic) BOOL isSeachViewControllerHidden;
 
-- (void)openStackAnimated:(BOOL)animated
-           withCompletion:(void(^)())completion;
-
-- (void)closeStackAnimated:(BOOL)animated
-            withCompletion:(void(^)())completion;
-
 - (void)insertCardWithViewController:(UIViewController *)viewController
                            withTitle:(NSString *)title
                  aboveViewController:(UIViewController *)aboveViewController

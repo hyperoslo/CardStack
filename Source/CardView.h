@@ -12,6 +12,7 @@
 @property (nonatomic) UIColor *titleColor;
 @property (nonatomic) UIFont *titleFont;
 @property (nonatomic) NSString *title;
+@property (nonatomic) UIPanGestureRecognizer *panRecognizer;
 
 @property (nonatomic, readonly) CGFloat titleBarHeight;
 
@@ -24,8 +25,8 @@
 
 @optional
 - (void)cardTitleTapped:(CardView *)card;
-- (void)cardRemoveRequested:(CardView *)card;
-- (void)cardTitleSwipeUp:(CardView *)card;
-- (void)cardTitleSwipeDown:(CardView *)card;
+- (void)cardTitlePanDidStart:(CardView *)card;
+- (void)card:(CardView *)card titlePannedByDelta:(CGPoint)delta;
+- (void)cardTitlePanDidFinish:(CardView *)card withVelocity:(CGPoint)velocity;
 
 @end

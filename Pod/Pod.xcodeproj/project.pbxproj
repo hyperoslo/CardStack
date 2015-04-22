@@ -12,8 +12,8 @@
 		146D729F1AB782920058798C /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 146D729E1AB782920058798C /* ViewController.m */; };
 		146D72A41AB782920058798C /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 146D72A31AB782920058798C /* Images.xcassets */; };
 		146D72B31AB782920058798C /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 146D72B21AB782920058798C /* Tests.m */; };
+		147872E71AE542020091AE1D /* CardView.m in Sources */ = {isa = PBXBuildFile; fileRef = 147872E61AE542020091AE1D /* CardView.m */; };
 		9AC5E5401ADC009300FE1E0D /* CardStackController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9AC5E53F1ADC009300FE1E0D /* CardStackController.m */; };
-		9AC5E5431ADEA4EB00FE1E0D /* Card.m in Sources */ = {isa = PBXBuildFile; fileRef = 9AC5E5421ADEA4EB00FE1E0D /* Card.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,7 +33,6 @@
 		145049721AB785A800D9745F /* CONTRIBUTING.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = CONTRIBUTING.md; path = ../CONTRIBUTING.md; sourceTree = "<group>"; };
 		145049731AB785A800D9745F /* LICENSE.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = LICENSE.md; path = ../LICENSE.md; sourceTree = "<group>"; };
 		145049741AB785A800D9745F /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
-		1450497A1AB785C700D9745F /* .gitkeep */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		146D72931AB782920058798C /* Pod.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pod.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		146D72971AB782920058798C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		146D72981AB782920058798C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -43,10 +42,10 @@
 		146D72AC1AB782920058798C /* Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		146D72B11AB782920058798C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		146D72B21AB782920058798C /* Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Tests.m; sourceTree = "<group>"; };
+		147872E51AE542020091AE1D /* CardView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CardView.h; sourceTree = "<group>"; };
+		147872E61AE542020091AE1D /* CardView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CardView.m; sourceTree = "<group>"; };
 		9AC5E53E1ADC009300FE1E0D /* CardStackController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CardStackController.h; sourceTree = "<group>"; };
 		9AC5E53F1ADC009300FE1E0D /* CardStackController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CardStackController.m; sourceTree = "<group>"; };
-		9AC5E5411ADEA4EB00FE1E0D /* Card.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Card.h; sourceTree = "<group>"; };
-		9AC5E5421ADEA4EB00FE1E0D /* Card.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Card.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,11 +89,10 @@
 		145049791AB785C700D9745F /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				1450497A1AB785C700D9745F /* .gitkeep */,
 				9AC5E53E1ADC009300FE1E0D /* CardStackController.h */,
 				9AC5E53F1ADC009300FE1E0D /* CardStackController.m */,
-				9AC5E5411ADEA4EB00FE1E0D /* Card.h */,
-				9AC5E5421ADEA4EB00FE1E0D /* Card.m */,
+				147872E51AE542020091AE1D /* CardView.h */,
+				147872E61AE542020091AE1D /* CardView.m */,
 			);
 			name = Source;
 			path = ../Source;
@@ -263,7 +261,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9AC5E5431ADEA4EB00FE1E0D /* Card.m in Sources */,
+				147872E71AE542020091AE1D /* CardView.m in Sources */,
 				9AC5E5401ADC009300FE1E0D /* CardStackController.m in Sources */,
 				146D729F1AB782920058798C /* ViewController.m in Sources */,
 				146D72991AB782920058798C /* main.m in Sources */,
@@ -374,6 +372,10 @@
 				INFOPLIST_FILE = Pod/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				WARNING_CFLAGS = (
+					"-Weverything",
+					"-Wno-objc-missing-property-synthesis",
+				);
 			};
 			name = Debug;
 		};
@@ -385,6 +387,10 @@
 				INFOPLIST_FILE = Pod/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				WARNING_CFLAGS = (
+					"-Weverything",
+					"-Wno-objc-missing-property-synthesis",
+				);
 			};
 			name = Release;
 		};

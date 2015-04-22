@@ -1,14 +1,28 @@
 #import "CardStackController.h"
 #import "CardView.h"
+#import "POP.h"
 
 static const CGFloat CardStackTitleBarBackgroundColorOffset = 1.0f / 16.0f;
 static const CGFloat CardStackTopMargin = 10.0f;
 static const CGFloat CardStackDepthOffset = 0.04f;
+static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
+static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0f;
+static const CGFloat CardStackVerticalVelocityLimitWhenRemovingCard = 100.0f;
+static const CGFloat CardStackTitleBarHeightWhenSearchIsShown = 8.0f;
+static const CGFloat CardStackOffsetToAvoidAreaBelowTheTitleToBecomeVisible = 1.0f;
+
+typedef NS_ENUM(NSUInteger, CardStackPanType) {
+    CardStackPanTypeUndefined,
+    CardStackPanTypeRemove,
+    CardStackPanTypeOpenOrClose
+};
 
 @interface CardStackController () <CardViewDelegate>
 
 @property (nonatomic) BOOL isAnimating;
 @property (nonatomic) BOOL isOpen;
+@property (nonatomic) CGRect originalCardFrame;
+@property (nonatomic) CardStackPanType panType;
 
 @end
 
@@ -17,7 +31,25 @@ static const CGFloat CardStackDepthOffset = 0.04f;
 @synthesize titleBarBackgroundColor = _titleBarBackgroundColor;
 @synthesize titleFont = _titleFont;
 
+- (instancetype)init {
+    self = [super init];
+    if (!self) return nil;
+
+    self.isSeachViewControllerHidden = YES;
+
+    return self;
+}
+
 #pragma mark - Setters
+
+- (void)setCards:(NSArray *)cards {
+    _cards = cards;
+
+    for (NSUInteger i = 0; i < cards.count; i++) {
+        CardView *card = [cards objectAtIndex:i];
+        card.tag = i;
+    }
+}
 
 - (void)setViewControllers:(NSArray *)viewControllers {
     _viewControllers = [viewControllers copy];
@@ -38,10 +70,14 @@ static const CGFloat CardStackDepthOffset = 0.04f;
 }
 
 - (void)setCurrentCardIndex:(NSUInteger)currentCardIndex {
+    [self setCurrentCardIndex:currentCardIndex animated:NO];
+}
+
+- (void)setCurrentCardIndex:(NSUInteger)currentCardIndex animated:(BOOL)animated {
     _currentCardIndex = currentCardIndex;
 
     [self updateCardScales];
-    [self updateCardLocations];
+    [self updateCardLocationsAnimated:animated];
 }
 
 - (void)setTitleBarBackgroundColor:(UIColor *)titleBarBackgroundColor {
@@ -49,21 +85,58 @@ static const CGFloat CardStackDepthOffset = 0.04f;
     [self updateCardTitleBarBackgroundColors];
 }
 
-- (void)setCurrentCardIndex:(NSUInteger)currentCardIndex
-                   animated:(BOOL)animated {
-    if (animated) {
-        [UIView animateWithDuration:0.5 animations:^{
-            self.currentCardIndex = currentCardIndex;
-        } completion:nil];
-    } else {
-        self.currentCardIndex = currentCardIndex;
-    }
-}
-
 - (void)setTitleFont:(UIFont *)titleFont {
     _titleFont = titleFont;
     for (CardView *card in self.cards) {
         card.titleFont = titleFont;
+    }
+}
+
+- (void)setSearchViewController:(UIViewController *)searchViewController {
+    [_searchViewController.view removeFromSuperview];
+
+    _searchViewController = searchViewController;
+    [self.view addSubview:searchViewController.view];
+
+    CGRect frame = searchViewController.view.frame;
+    frame.origin.y = -searchViewController.view.frame.size.height;
+    searchViewController.view.frame = frame;
+}
+
+- (void)setIsSeachViewControllerHidden:(BOOL)isSeachViewControllerHidden {
+    [self setIsSeachViewControllerHidden:isSeachViewControllerHidden
+                                animated:NO
+                          withCompletion:nil];
+}
+
+- (void)setIsSeachViewControllerHidden:(BOOL)isSeachViewControllerHidden
+                              animated:(BOOL)animated
+                        withCompletion:(void(^)())completion {
+    if (!isSeachViewControllerHidden && !self.searchViewController) {
+        return;
+    }
+
+    _isSeachViewControllerHidden = isSeachViewControllerHidden;
+    if (animated) {
+        [UIView animateWithDuration:0.5 animations:^{
+            [self updateCardLocations];
+        } completion:^(BOOL finished) {
+            if (completion) {
+                completion();
+            }
+        }];
+    } else {
+        [self updateCardLocations];
+        if (completion) {
+            completion();
+        }
+    }
+}
+
+- (void)setIsOpen:(BOOL)isOpen {
+    _isOpen = isOpen;
+    if (isOpen && !self.isSeachViewControllerHidden) {
+        _isSeachViewControllerHidden = YES;
     }
 }
 
@@ -96,121 +169,119 @@ static const CGFloat CardStackDepthOffset = 0.04f;
 #pragma mark - CardDelegate
 
 - (void)cardTitleTapped:(CardView *)card {
-    NSUInteger index = 0;
-    for (CardView *c in self.cards) {
-        if ([c isEqual:card]) {
-            break;
-        }
-        ++index;
-    }
-
-    if (index == self.currentCardIndex) {
-        if (index > 0) {
-            if (self.isOpen) {
-                [self closeStackAnimated:YES withCompletion:nil];
-            } else {
-                [self openStackAnimated:YES withCompletion:nil];
-            }
-        }
-    } else {
-        if (index < self.cards.count - 1) {
-            self.isOpen = NO;
-        } else {
-            self.isOpen = YES;
-        }
-        [self setCurrentCardIndex:index animated:YES];
+    if (card.tag != self.currentCardIndex) {
+        self.isOpen = NO;
+        [self setCurrentCardIndex:card.tag
+                         animated:YES];
     }
 }
 
-- (void)cardRemoveRequested:(CardView *)card {
-    if (self.cards.count < 2) {
-        return;
-    }
+- (void)cardTitlePanDidStart:(CardView *)card {
+    self.originalCardFrame = card.frame;
+    self.panType = CardStackPanTypeUndefined;
+}
 
-    NSUInteger index = 0;
-    for (CardView *c in self.cards) {
-        if ([c isEqual:card]) {
-            break;
+- (void)card:(CardView *)card titlePannedByDelta:(CGPoint)delta {
+    if (self.panType == CardStackPanTypeUndefined) {
+        if (fabs(delta.x) > fabs(delta.y)) {
+            self.panType = CardStackPanTypeRemove;
+        } else {
+            self.panType = CardStackPanTypeOpenOrClose;
         }
-        ++index;
     }
 
-    [self removeCardAtIndex:index
-                   animated:YES
-             withCompletion:nil];
+    if (self.panType == CardStackPanTypeOpenOrClose) {
+        if ((card.tag != self.currentCardIndex &&
+            card.tag != self.cards.count - 1) ||
+            self.cards.count == 1) {
+            return;
+        }
+
+        CGFloat y = self.originalCardFrame.origin.y + delta.y;
+        if (y >= 0.0f) {
+            CGRect frame = self.originalCardFrame;
+            frame.origin.y = y;
+            card.frame = frame;
+            [self updateCardLocationsWhileOpening];
+        }
+    } else if (self.panType == CardStackPanTypeRemove) {
+        if (card.tag > self.currentCardIndex) {
+            return;
+        }
+
+        CGFloat x = self.originalCardFrame.origin.x + delta.x;
+        if (x >= 0.0f) {
+            CGRect frame = self.originalCardFrame;
+            frame.origin.x = x;
+            card.frame = frame;
+        }
+    }
+}
+
+- (void)cardTitlePanDidFinish:(CardView *)card withVelocity:(CGPoint)velocity {
+    if (self.panType == CardStackPanTypeOpenOrClose) {
+        if ((card.tag != self.currentCardIndex &&
+             card.tag != self.cards.count - 1) ||
+            self.cards.count == 1) {
+            return;
+        }
+
+        if (card.tag == self.currentCardIndex) {
+            if (velocity.y < 0.0f) {
+                self.isOpen = NO;
+            } else {
+                CGFloat heightAboveCurrentCardWhenOpen = CardStackTopMargin;
+                for (NSUInteger i = 0; i < self.currentCardIndex - 1; i++) {
+                    CardView *card = [self.cards objectAtIndex:i];
+                    heightAboveCurrentCardWhenOpen += card.titleBarHeight * card.scale;
+                }
+                self.isOpen = (card.frame.origin.y > heightAboveCurrentCardWhenOpen * CardStackOpenIfLargeThanPercent);
+            }
+            [self updateCardLocationsAnimatedWithVerticalVelocity:velocity.y];
+        } else if (card.tag == self.cards.count - 1) {
+            if (velocity.y < 0.0f &&
+                fabs(velocity.y) > CardStackVerticalVelocityLimitWhenMakingCardCurrent) {
+                CGRect frame = [self frameForCardAtIndex:card.tag];
+                frame.origin.y = 0;
+                [self moveCard:card toFrame:frame springBounciness:8.0f velocity:CGPointMake(0, velocity.y) withCompletion:^{
+                    self.isOpen = NO;
+                    self.currentCardIndex = self.cards.count - 1;
+                    [self updateCardScales];
+                    [self updateCardLocations];
+                }];
+            } else {
+                [self updateCardLocationsAnimated:YES];
+            }
+        }
+    } else if (self.panType == CardStackPanTypeRemove) {
+        if (card.tag > self.currentCardIndex) {
+            return;
+        }
+
+        BOOL isQuickRightFlick = (velocity.x > CardStackVerticalVelocityLimitWhenRemovingCard);
+        if (!isQuickRightFlick || self.cards.count < 2) {
+            [self moveCard:card
+                   toFrame:self.originalCardFrame
+          springBounciness:8.0f
+                  velocity:CGPointMake(velocity.x, 0)
+            withCompletion:nil];
+        } else {
+            CGRect frame = self.originalCardFrame;
+            frame.origin.x = self.view.bounds.size.width;
+            [self moveCard:card
+                   toFrame:frame
+          springBounciness:0.0f
+                  velocity:CGPointMake(velocity.x, 0)
+            withCompletion:^{
+                [self removeCardAtIndex:card.tag
+                               animated:YES
+                         withCompletion:nil];
+            }];
+        }
+    }
 }
 
 #pragma mark - Other methods
-
-- (void)openStackAnimated:(BOOL)animated
-           withCompletion:(void(^)())completion {
-    if (self.isAnimating) {
-        return;
-    }
-
-    self.isOpen = YES;
-    if ([self.delegate respondsToSelector:@selector(cardStackControllerWillOpen:)]) {
-        [self.delegate cardStackControllerWillOpen:self];
-    }
-
-    if (animated) {
-        self.isAnimating = YES;
-        [UIView animateWithDuration:0.5 animations:^{
-            [self updateCardLocations];
-        } completion:^(BOOL finished) {
-            self.isAnimating = NO;
-            if ([self.delegate respondsToSelector:@selector(cardStackControllerDidOpen:)]) {
-                [self.delegate cardStackControllerDidOpen:self];
-            }
-            if (completion) {
-                completion();
-            }
-        }];
-    } else {
-        [self updateCardLocations];
-        if ([self.delegate respondsToSelector:@selector(cardStackControllerDidOpen:)]) {
-            [self.delegate cardStackControllerDidOpen:self];
-        }
-        if (completion) {
-            completion();
-        }
-    }
-}
-
-- (void)closeStackAnimated:(BOOL)animated
-            withCompletion:(void(^)())completion {
-    if (self.isAnimating) {
-        return;
-    }
-
-    self.isOpen = NO;
-    if ([self.delegate respondsToSelector:@selector(cardStackControllerWillClose:)]) {
-        [self.delegate cardStackControllerWillClose:self];
-    }
-
-    if (animated) {
-        self.isAnimating = YES;
-        [UIView animateWithDuration:0.5 animations:^{
-            [self updateCardLocations];
-        } completion:^(BOOL finished) {
-            self.isAnimating = NO;
-            if ([self.delegate respondsToSelector:@selector(cardStackControllerDidClose:)]) {
-                [self.delegate cardStackControllerDidClose:self];
-            }
-            if (completion) {
-                completion();
-            }
-        }];
-    } else {
-        [self updateCardLocations];
-        if ([self.delegate respondsToSelector:@selector(cardStackControllerDidClose:)]) {
-            [self.delegate cardStackControllerDidClose:self];
-        }
-        if (completion) {
-            completion();
-        }
-    }
-}
 
 - (void)insertCardWithViewController:(UIViewController *)viewController
                            withTitle:(NSString *)title
@@ -308,8 +379,8 @@ static const CGFloat CardStackDepthOffset = 0.04f;
     [mutableCards insertObject:card atIndex:index + 1];
     self.cards = [mutableCards copy];
     [self.view insertSubview:card aboveSubview:belowCard];
-    if (index == self.currentCardIndex && makeCurrent && animated) {
-        // make sure the card animation starts outside of the screen
+    BOOL cardAnimationShouldStartOutsideOfTheScreen = (index == self.currentCardIndex && makeCurrent && animated);
+    if (cardAnimationShouldStartOutsideOfTheScreen) {
         CGRect frame = card.frame;
         frame.origin.y = self.view.bounds.size.height;
         card.frame = frame;
@@ -348,8 +419,8 @@ static const CGFloat CardStackDepthOffset = 0.04f;
         return;
     }
 
-    // avoid unwanted animation if the topmost card is removed
-    if (!self.isOpen) {
+    BOOL shouldAvoidUnwantedAnimationIfTopmostCardIsRemoved = (!self.isOpen);
+    if (shouldAvoidUnwantedAnimationIfTopmostCardIsRemoved) {
         animated = NO;
     }
 
@@ -360,7 +431,6 @@ static const CGFloat CardStackDepthOffset = 0.04f;
     _viewControllers = [mutableViewControllers copy];
 
     __block CardView *card = [self.cards objectAtIndex:index];
-
     NSMutableArray *mutableCards = [self.cards mutableCopy];
     [mutableCards removeObjectAtIndex:index];
     self.cards = [mutableCards copy];
@@ -381,7 +451,7 @@ static const CGFloat CardStackDepthOffset = 0.04f;
             frame.origin.x = frame.origin.x + self.view.bounds.size.width;
             card.frame = frame;
         } completion:^(BOOL finished) {
-            // removal is diferred, so a proper removal animation could be executed
+            // removal from superview is diferred to make sure a proper removal animation is visible
             [card removeFromSuperview];
 
             if (completion) {
@@ -435,35 +505,104 @@ static const CGFloat CardStackDepthOffset = 0.04f;
 }
 
 - (void)updateCardLocations {
-    if (self.isOpen) {
-        CGFloat previousTitleBarHeights = 0.0f;
-        for (NSUInteger i = 0; i < self.cards.count; i++) {
-            CardView *card = [self.cards objectAtIndex:i];
+    [self updateCardLocationsAnimated:NO];
+}
 
-            CGRect frame = card.frame;
-            if (i <= self.currentCardIndex) {
-                frame.origin.y = previousTitleBarHeights + CardStackTopMargin;
-            } else {
-                frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
-            }
-            card.frame = frame;
-
-            // -1.0f is used to avoid area below the title bar to become slightly visible is some cases (due to rounding errors)
-            previousTitleBarHeights += (card.titleBarHeight * card.scale - 1.0f);
-        }
+- (void)updateCardLocationsAnimated:(BOOL)animated {
+    if (animated) {
+        [self updateCardLocationsAnimatedWithVerticalVelocity:0.0f];
     } else {
         for (NSUInteger i = 0; i < self.cards.count; i++) {
             CardView *card = [self.cards objectAtIndex:i];
-
-            CGRect frame = card.frame;
-            if (i <= self.currentCardIndex) {
-                frame.origin.y = 0;
-            } else {
-                frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
-            }
-            card.frame = frame;
+            card.frame = [self frameForCardAtIndex:i];
         }
     }
+}
+
+- (void)updateCardLocationsAnimatedWithVerticalVelocity:(CGFloat)verticalVelocity {
+    for (NSUInteger i = 0; i < self.cards.count; i++) {
+        CardView *card = [self.cards objectAtIndex:i];
+        POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
+        CGRect frame = [self frameForCardAtIndex:i];
+        springAnimation.toValue = [NSValue valueWithCGRect:frame];
+        springAnimation.springBounciness = 8;
+        BOOL shouldScaleDownVelocityForUpperCardsAvoidingSpringEffectForCardsNearToTheTop = (verticalVelocity > 0.0f && i <= self.currentCardIndex);
+        if (shouldScaleDownVelocityForUpperCardsAvoidingSpringEffectForCardsNearToTheTop) {
+            CGFloat springVelocity = (verticalVelocity * card.scale) * ((CGFloat)i / (CGFloat)(self.currentCardIndex + 1));
+            springAnimation.velocity = [NSValue valueWithCGRect:CGRectMake(0, springVelocity, 0, 0)];
+        }
+        [card pop_addAnimation:springAnimation forKey:@"frame"];
+    }
+}
+
+- (void)updateCardLocationsWhileOpening {
+    if (self.currentCardIndex > 0) {
+        CGFloat startY = CardStackTopMargin;
+        CardView *currentCard = [self.cards objectAtIndex:self.currentCardIndex];
+        CGFloat endY = currentCard.frame.origin.y;
+        CGFloat currentY = startY;
+        CGFloat incrementY = (endY - startY) / self.currentCardIndex;
+        for (NSUInteger i = 0; i < self.currentCardIndex; i++) {
+            currentCard = [self.cards objectAtIndex:i];
+            CGRect frame = currentCard.frame;
+            frame.origin.y = currentY;
+            currentCard.frame = frame;
+            currentY = currentY + incrementY;
+        }
+    }
+}
+
+- (CGRect)frameForCardAtIndex:(NSUInteger)index {
+    CGRect frame;
+
+    // Note: Cards at the bottom but behind the last card will be positioned 
+    // outside of the visible area, so their title bar won't show up when the 
+    // last card is being moved.
+    BOOL shouldCardRemainInvisibleEvenIfLastCardIsMoved = (index > self.currentCardIndex && index < self.cards.count - 1);
+    if (index <= self.currentCardIndex) {
+        if (self.isOpen) {
+            CGFloat previousTitleBarHeights = CardStackTopMargin;
+            for (NSUInteger i = 0; i < index; i++) {
+                CardView *card = [self.cards objectAtIndex:i];
+                previousTitleBarHeights += (card.titleBarHeight * card.scale - CardStackOffsetToAvoidAreaBelowTheTitleToBecomeVisible);
+            }
+
+            CardView *card = [self.cards objectAtIndex:index];
+            frame = card.frame;
+            frame.origin.y = previousTitleBarHeights;
+        } else {
+            CardView *card = [self.cards objectAtIndex:index];
+            frame = card.frame;
+            frame.origin.y = 0;
+        }
+    } else if (shouldCardRemainInvisibleEvenIfLastCardIsMoved) {
+        CardView *card = [self.cards objectAtIndex:index];
+        frame = card.frame;
+        frame.origin.y = self.view.bounds.size.height;
+    } else {
+        CardView *card = [self.cards objectAtIndex:index];
+        frame = card.frame;
+        frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
+    }
+
+    return frame;
+}
+
+- (void)moveCard:(CardView *)card
+         toFrame:(CGRect)frame
+springBounciness:(CGFloat)bounciness
+        velocity:(CGPoint)velocity
+  withCompletion:(void(^)())completion {
+    POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
+    springAnimation.toValue = [NSValue valueWithCGRect:frame];
+    springAnimation.springBounciness = bounciness;
+    springAnimation.velocity = [NSValue valueWithCGRect:CGRectMake(velocity.x, velocity.y, 0, 0)];
+    springAnimation.completionBlock = ^(POPAnimation *anim, BOOL finished) {
+        if (completion) {
+            completion();
+        }
+    };
+    [card pop_addAnimation:springAnimation forKey:@"frame"];
 }
 
 @end

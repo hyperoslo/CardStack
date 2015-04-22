@@ -9,7 +9,7 @@ static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
 static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0f;
 static const CGFloat CardStackVerticalVelocityLimitWhenRemovingCard = 100.0f;
 static const CGFloat CardStackTitleBarHeightWhenSearchIsShown = 8.0f;
-static const CGFloat CardStackOffsetToAvoidAreaBellowTheTitleToBecomeVisible = 1.0f;
+static const CGFloat CardStackOffsetToAvoidAreaBelowTheTitleToBecomeVisible = 1.0f;
 
 typedef NS_ENUM(NSUInteger, CardStackPanType) {
     CardStackPanTypeUndefined,
@@ -564,7 +564,7 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
             CGFloat previousTitleBarHeights = CardStackTopMargin;
             for (NSUInteger i = 0; i < index; i++) {
                 CardView *card = [self.cards objectAtIndex:i];
-                previousTitleBarHeights += (card.titleBarHeight * card.scale - CardStackOffsetToAvoidAreaBellowTheTitleToBecomeVisible);
+                previousTitleBarHeights += (card.titleBarHeight * card.scale - CardStackOffsetToAvoidAreaBelowTheTitleToBecomeVisible);
             }
 
             CardView *card = [self.cards objectAtIndex:index];

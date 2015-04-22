@@ -9,7 +9,7 @@ static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
 static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0f;
 static const CGFloat CardStackVerticalVelocityLimitWhenRemovingCard = 100.0f;
 static const CGFloat CardStackTitleBarHeightWhenSearchIsShown = 8.0f;
-static const CGFloat CardStackTitleBarOverlapToAvoidGaps = 1.0f;
+static const CGFloat CardStackOffsetToAvoidAreaBelowTheTitleToBecomeVisible = 1.0f;
 
 typedef NS_ENUM(NSUInteger, CardStackPanType) {
     CardStackPanTypeUndefined,
@@ -379,8 +379,8 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
     [mutableCards insertObject:card atIndex:index + 1];
     self.cards = [mutableCards copy];
     [self.view insertSubview:card aboveSubview:belowCard];
-    if (index == self.currentCardIndex && makeCurrent && animated) {
-        // make sure the card animation starts outside of the screen
+    BOOL cardAnimationShouldStartOutsideOfTheScreen = (index == self.currentCardIndex && makeCurrent && animated);
+    if (cardAnimationShouldStartOutsideOfTheScreen) {
         CGRect frame = card.frame;
         frame.origin.y = self.view.bounds.size.height;
         card.frame = frame;
@@ -419,8 +419,8 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
         return;
     }
 
-    // avoid unwanted animation if the topmost card is removed
-    if (!self.isOpen) {
+    BOOL shouldAvoidUnwantedAnimationIfTopmostCardIsRemoved = (!self.isOpen);
+    if (shouldAvoidUnwantedAnimationIfTopmostCardIsRemoved) {
         animated = NO;
     }
 
@@ -526,9 +526,8 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
         CGRect frame = [self frameForCardAtIndex:i];
         springAnimation.toValue = [NSValue valueWithCGRect:frame];
         springAnimation.springBounciness = 8;
-        BOOL hasVelocityAndCardIsCurrentOrAbove = (verticalVelocity > 0.0f && i <= self.currentCardIndex);
-        if (hasVelocityAndCardIsCurrentOrAbove) {
-            // scale down velocity for upper cards to avoid unwanted spring effect for cards near to the top
+        BOOL shouldScaleDownVelocityForUpperCardsAvoidingSpringEffectForCardsNearToTheTop = (verticalVelocity > 0.0f && i <= self.currentCardIndex);
+        if (shouldScaleDownVelocityForUpperCardsAvoidingSpringEffectForCardsNearToTheTop) {
             CGFloat springVelocity = (verticalVelocity * card.scale) * ((CGFloat)i / (CGFloat)(self.currentCardIndex + 1));
             springAnimation.velocity = [NSValue valueWithCGRect:CGRectMake(0, springVelocity, 0, 0)];
         }
@@ -556,15 +555,16 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
 - (CGRect)frameForCardAtIndex:(NSUInteger)index {
     CGRect frame;
 
-    BOOL isCardAtTheBottomAndCoveredByTheLastCard = (index > self.currentCardIndex && index < self.cards.count - 1);
+    // Note: Cards at the bottom but behind the last card will be positioned 
+    // outside of the visible area, so their title bar won't show up when the 
+    // last card is being moved.
+    BOOL shouldCardRemainInvisibleEvenIfLastCardIsMoved = (index > self.currentCardIndex && index < self.cards.count - 1);
     if (index <= self.currentCardIndex) {
         if (self.isOpen) {
             CGFloat previousTitleBarHeights = CardStackTopMargin;
             for (NSUInteger i = 0; i < index; i++) {
                 CardView *card = [self.cards objectAtIndex:i];
-
-                // -1.0f is used to avoid area below the title bar to become slightly visible is some cases (due to rounding errors)
-                previousTitleBarHeights += (card.titleBarHeight * card.scale - CardStackTitleBarOverlapToAvoidGaps);
+                previousTitleBarHeights += (card.titleBarHeight * card.scale - CardStackOffsetToAvoidAreaBelowTheTitleToBecomeVisible);
             }
 
             CardView *card = [self.cards objectAtIndex:index];
@@ -575,8 +575,7 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
             frame = card.frame;
             frame.origin.y = 0;
         }
-    } else if (isCardAtTheBottomAndCoveredByTheLastCard) {
-        // cards at the bottom but behind the last card will be positioned outside of the visible area, so their title bar won't show up when the last card is being moved
+    } else if (shouldCardRemainInvisibleEvenIfLastCardIsMoved) {
         CardView *card = [self.cards objectAtIndex:index];
         frame = card.frame;
         frame.origin.y = self.view.bounds.size.height;

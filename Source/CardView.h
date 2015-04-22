@@ -25,9 +25,8 @@
 
 @optional
 - (void)cardTitleTapped:(CardView *)card;
-- (void)cardRemoveRequested:(CardView *)card;
 - (void)cardTitlePanDidStart:(CardView *)card;
 - (void)card:(CardView *)card titlePannedByDelta:(CGPoint)delta;
-- (void)cardTitlePanDidFinish:(CardView *)card withVerticalVelocity:(CGFloat)verticalVelocity;
+- (void)cardTitlePanDidFinish:(CardView *)card withVelocity:(CGPoint)velocity;
 
 @end

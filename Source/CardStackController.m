@@ -241,20 +241,14 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
         } else if (card.tag == self.cards.count - 1) {
             if (velocity.y < 0.0f &&
                 fabs(velocity.y) > CardStackVerticalVelocityLimitWhenMakingCardCurrent) {
-                // apply animation only to the card being moved (the rest remain stationary)
-                POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
                 CGRect frame = [self frameForCardAtIndex:card.tag];
                 frame.origin.y = 0;
-                springAnimation.toValue = [NSValue valueWithCGRect:frame];
-                springAnimation.springBounciness = 8;
-                springAnimation.velocity = [NSValue valueWithCGRect:CGRectMake(0, velocity.y, 0, 0)];
-                springAnimation.completionBlock = ^(POPAnimation *anim, BOOL finished) {
+                [self moveCard:card toFrame:frame springBounciness:8.0f velocity:CGPointMake(0, velocity.y) withCompletion:^{
                     self.isOpen = NO;
                     self.currentCardIndex = self.cards.count - 1;
                     [self updateCardScales];
                     [self updateCardLocations];
-                };
-                [card pop_addAnimation:springAnimation forKey:@"frame"];
+                }];
             } else {
                 [self updateCardLocationsAnimated:YES];
             }

@@ -558,7 +558,7 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
     // Note: Cards at the bottom but behind the last card will be positioned 
     // outside of the visible area, so their title bar won't show up when the 
     // last card is being moved.
-    BOOL isCardAtTheBottomAndCoveredByTheLastCard = (index > self.currentCardIndex && index < self.cards.count - 1);
+    BOOL shouldCardRemainInvisibleEvenIfLastCardIsMoved = (index > self.currentCardIndex && index < self.cards.count - 1);
     if (index <= self.currentCardIndex) {
         if (self.isOpen) {
             CGFloat previousTitleBarHeights = CardStackTopMargin;
@@ -575,7 +575,7 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
             frame = card.frame;
             frame.origin.y = 0;
         }
-    } else if (isCardAtTheBottomAndCoveredByTheLastCard) {
+    } else if (shouldCardRemainInvisibleEvenIfLastCardIsMoved) {
         CardView *card = [self.cards objectAtIndex:index];
         frame = card.frame;
         frame.origin.y = self.view.bounds.size.height;

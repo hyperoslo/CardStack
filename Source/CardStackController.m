@@ -11,9 +11,9 @@ static const CGFloat CardStackVerticalVelocityLimitWhenRemovingCard = 100.0f;
 static const CGFloat CardStackTitleBarHeightWhenSearchIsShown = 8.0f;
 
 typedef NS_ENUM(NSUInteger, CardStackPanType) {
-    PTUndefined,
-    PTRemove,
-    PTOpenClose
+    CardStackPanTypeUndefined,
+    CardStackPanTypeRemove,
+    CardStackPanTypeOpenOrClose
 };
 
 @interface CardStackController () <CardViewDelegate>
@@ -177,19 +177,19 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
 
 - (void)cardTitlePanDidStart:(CardView *)card {
     self.originalCardFrame = card.frame;
-    self.panType = PTUndefined;
+    self.panType = CardStackPanTypeUndefined;
 }
 
 - (void)card:(CardView *)card titlePannedByDelta:(CGPoint)delta {
-    if (self.panType == PTUndefined) {
+    if (self.panType == CardStackPanTypeUndefined) {
         if (fabs(delta.x) > fabs(delta.y)) {
-            self.panType = PTRemove;
+            self.panType = CardStackPanTypeRemove;
         } else {
-            self.panType = PTOpenClose;
+            self.panType = CardStackPanTypeOpenOrClose;
         }
     }
 
-    if (self.panType == PTOpenClose) {
+    if (self.panType == CardStackPanTypeOpenOrClose) {
         if ((card.tag != self.currentCardIndex &&
             card.tag != self.cards.count - 1) ||
             self.cards.count == 1) {
@@ -203,7 +203,7 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
             card.frame = frame;
             [self updateCardLocationsWhileOpening];
         }
-    } else if (self.panType == PTRemove) {
+    } else if (self.panType == CardStackPanTypeRemove) {
         if (card.tag > self.currentCardIndex) {
             return;
         }
@@ -218,7 +218,7 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
 }
 
 - (void)cardTitlePanDidFinish:(CardView *)card withVelocity:(CGPoint)velocity {
-    if (self.panType == PTOpenClose) {
+    if (self.panType == CardStackPanTypeOpenOrClose) {
         if ((card.tag != self.currentCardIndex &&
              card.tag != self.cards.count - 1) ||
             self.cards.count == 1) {
@@ -258,7 +258,7 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
                 [self updateCardLocationsAnimated:YES];
             }
         }
-    } else if (self.panType == PTRemove) {
+    } else if (self.panType == CardStackPanTypeRemove) {
         if (card.tag > self.currentCardIndex) {
             return;
         }

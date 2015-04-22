@@ -190,8 +190,9 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
     }
 
     if (self.panType == PTOpenClose) {
-        if (card.tag != self.currentCardIndex &&
-            card.tag != self.cards.count - 1) {
+        if ((card.tag != self.currentCardIndex &&
+            card.tag != self.cards.count - 1) ||
+            self.cards.count == 1) {
             return;
         }
 
@@ -218,8 +219,9 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
 
 - (void)cardTitlePanDidFinish:(CardView *)card withVelocity:(CGPoint)velocity {
     if (self.panType == PTOpenClose) {
-        if (card.tag != self.currentCardIndex &&
-            card.tag != self.cards.count - 1) {
+        if ((card.tag != self.currentCardIndex &&
+             card.tag != self.cards.count - 1) ||
+            self.cards.count == 1) {
             return;
         }
 

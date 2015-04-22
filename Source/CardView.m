@@ -166,21 +166,29 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 - (void)panAction:(UIPanGestureRecognizer *)panRecognizer {
     static CGPoint originalPoint;
 
-    if (panRecognizer.state == UIGestureRecognizerStateBegan) {
-        originalPoint = [panRecognizer locationInView:self.superview];
-        if ([self.delegate respondsToSelector:@selector(cardTitlePanDidStart:)]) {
-            [self.delegate cardTitlePanDidStart:self];
+    switch (panRecognizer.state) {
+        case UIGestureRecognizerStateBegan:
+            originalPoint = [panRecognizer locationInView:self.superview];
+            if ([self.delegate respondsToSelector:@selector(cardTitlePanDidStart:)]) {
+                [self.delegate cardTitlePanDidStart:self];
+            }
+            break;
+        case UIGestureRecognizerStateChanged: {
+            CGPoint point = [panRecognizer locationInView:self.superview];
+            CGPoint delta = CGPointMake(point.x - originalPoint.x, point.y - originalPoint.y);
+            if ([self.delegate respondsToSelector:@selector(card:titlePannedByDelta:)]) {
+                [self.delegate card:self titlePannedByDelta:delta];
+            }
+            break;
         }
-    } else if (panRecognizer.state == UIGestureRecognizerStateChanged) {
-        CGPoint point = [panRecognizer locationInView:self.superview];
-        CGPoint delta = CGPointMake(point.x - originalPoint.x, point.y - originalPoint.y);
-        if ([self.delegate respondsToSelector:@selector(card:titlePannedByDelta:)]) {
-            [self.delegate card:self titlePannedByDelta:delta];
-        }
-    } else if (panRecognizer.state == UIGestureRecognizerStateCancelled || panRecognizer.state == UIGestureRecognizerStateEnded) {
-        if ([self.delegate respondsToSelector:@selector(cardTitlePanDidFinish:withVelocity:)]) {
-            [self.delegate cardTitlePanDidFinish:self withVelocity:[panRecognizer velocityInView:self.superview]];
-        }
+        case UIGestureRecognizerStateCancelled:
+        case UIGestureRecognizerStateEnded:
+            if ([self.delegate respondsToSelector:@selector(cardTitlePanDidFinish:withVelocity:)]) {
+                [self.delegate cardTitlePanDidFinish:self withVelocity:[panRecognizer velocityInView:self.superview]];
+            }
+            break;
+        default:
+            break;
     }
 }
 

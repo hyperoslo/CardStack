@@ -9,6 +9,7 @@ static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
 static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0f;
 static const CGFloat CardStackVerticalVelocityLimitWhenRemovingCard = 100.0f;
 static const CGFloat CardStackTitleBarHeightWhenSearchIsShown = 8.0f;
+static const CGFloat CardStackTitleBarOverlapToAvoidGaps = 1.0f;
 
 typedef NS_ENUM(NSUInteger, CardStackPanType) {
     CardStackPanTypeUndefined,
@@ -265,27 +266,23 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
 
         BOOL isQuickRightFlick = (velocity.x > CardStackVerticalVelocityLimitWhenRemovingCard);
         if (!isQuickRightFlick || self.cards.count < 2) {
-            // apply animation only to the card being moved (the rest remain stationary)
-            POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
-            CGRect frame = self.originalCardFrame;
-            springAnimation.toValue = [NSValue valueWithCGRect:frame];
-            springAnimation.springBounciness = 8;
-            springAnimation.velocity = [NSValue valueWithCGRect:CGRectMake(velocity.x, 0, 0, 0)];
-            [card pop_addAnimation:springAnimation forKey:@"frame"];
+            [self moveCard:card
+                   toFrame:self.originalCardFrame
+          springBounciness:8.0f
+                  velocity:CGPointMake(velocity.x, 0)
+            withCompletion:nil];
         } else {
-            // apply animation only to the card being moved (the rest remain stationary)
-            POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
             CGRect frame = self.originalCardFrame;
             frame.origin.x = self.view.bounds.size.width;
-            springAnimation.toValue = [NSValue valueWithCGRect:frame];
-            springAnimation.springBounciness = 0;
-            springAnimation.velocity = [NSValue valueWithCGRect:CGRectMake(velocity.x, 0, 0, 0)];
-            springAnimation.completionBlock = ^(POPAnimation *anim, BOOL finished) {
+            [self moveCard:card
+                   toFrame:frame
+          springBounciness:0.0f
+                  velocity:CGPointMake(velocity.x, 0)
+            withCompletion:^{
                 [self removeCardAtIndex:card.tag
                                animated:YES
                          withCompletion:nil];
-            };
-            [card pop_addAnimation:springAnimation forKey:@"frame"];
+            }];
         }
     }
 }
@@ -573,7 +570,7 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
                 CardView *card = [self.cards objectAtIndex:i];
 
                 // -1.0f is used to avoid area below the title bar to become slightly visible is some cases (due to rounding errors)
-                previousTitleBarHeights += (card.titleBarHeight * card.scale - 1.0f);
+                previousTitleBarHeights += (card.titleBarHeight * card.scale - CardStackTitleBarOverlapToAvoidGaps);
             }
 
             CardView *card = [self.cards objectAtIndex:index];
@@ -596,6 +593,23 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
     }
 
     return frame;
+}
+
+- (void)moveCard:(CardView *)card
+         toFrame:(CGRect)frame
+springBounciness:(CGFloat)bounciness
+        velocity:(CGPoint)velocity
+  withCompletion:(void(^)())completion {
+    POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
+    springAnimation.toValue = [NSValue valueWithCGRect:frame];
+    springAnimation.springBounciness = bounciness;
+    springAnimation.velocity = [NSValue valueWithCGRect:CGRectMake(velocity.x, velocity.y, 0, 0)];
+    springAnimation.completionBlock = ^(POPAnimation *anim, BOOL finished) {
+        if (completion) {
+            completion();
+        }
+    };
+    [card pop_addAnimation:springAnimation forKey:@"frame"];
 }
 
 @end

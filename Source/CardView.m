@@ -187,7 +187,8 @@ static const CGFloat CardTitleBarHeight = 44.0f;
                 [self.delegate cardTitlePanDidFinish:self withVelocity:[panRecognizer velocityInView:self.superview]];
             }
             break;
-        default:
+        case UIGestureRecognizerStatePossible:
+        case UIGestureRecognizerStateFailed:
             break;
     }
 }

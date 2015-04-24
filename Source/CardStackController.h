@@ -39,6 +39,8 @@
                               animated:(BOOL)animated
                         withCompletion:(void(^)())completion;
 
+- (CardView *)cardViewForViewController:(UIViewController *)viewController;
+
 @end
 
 @protocol CardStackControllerDelegate <NSObject>

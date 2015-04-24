@@ -283,6 +283,19 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
 
 #pragma mark - Other methods
 
+- (CardView *)cardViewForViewController:(UIViewController *)viewController {
+    CardView *card;
+
+    for (NSUInteger index = 0; index < self.viewControllers.count; index++) {
+        if ([[self.viewControllers objectAtIndex:index] isEqual:viewController]) {
+            card = [self.cards objectAtIndex:index];
+            break;
+        }
+    }
+
+    return card;
+}
+
 - (void)insertCardWithViewController:(UIViewController *)viewController
                            withTitle:(NSString *)title
                  aboveViewController:(UIViewController *)aboveViewController
@@ -555,8 +568,8 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
 - (CGRect)frameForCardAtIndex:(NSUInteger)index {
     CGRect frame;
 
-    // Note: Cards at the bottom but behind the last card will be positioned 
-    // outside of the visible area, so their title bar won't show up when the 
+    // Note: Cards at the bottom but behind the last card will be positioned
+    // outside of the visible area, so their title bar won't show up when the
     // last card is being moved.
     BOOL shouldCardRemainInvisibleEvenIfLastCardIsMoved = (index > self.currentCardIndex && index < self.cards.count - 1);
     if (index <= self.currentCardIndex) {

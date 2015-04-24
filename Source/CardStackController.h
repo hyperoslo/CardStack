@@ -39,7 +39,10 @@
                               animated:(BOOL)animated
                         withCompletion:(void(^)())completion;
 
+- (void)setCurrentCardIndex:(NSUInteger)currentCardIndex animated:(BOOL)animated;
+
 - (CardView *)cardViewForViewController:(UIViewController *)viewController;
+- (NSUInteger)indexForViewController:(UIViewController *)viewController;
 
 @end
 

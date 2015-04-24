@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "CardStack"
-  s.summary          = "A container view controller implementing a stack of "cards" (each card is a view controller)"
+  s.summary          = "A container view controller implementing a stack of 'cards' (each card is a view controller)"
   s.version          = "0.2"
   s.homepage         = "https://github.com/hyperoslo/CardStack"
   s.license          = 'MIT'

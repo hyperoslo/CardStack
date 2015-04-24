@@ -8,8 +8,10 @@ static const CGFloat CardStackDepthOffset = 0.04f;
 static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
 static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0f;
 static const CGFloat CardStackVerticalVelocityLimitWhenRemovingCard = 100.0f;
-static const CGFloat CardStackTitleBarHeightWhenSearchIsShown = 8.0f;
 static const CGFloat CardStackOffsetToAvoidAreaBelowTheTitleToBecomeVisible = 1.0f;
+static const CGFloat CardStackMaximumVisibleTitleBarProportion = 1.3f;
+static const CGFloat CardStackMinimumSearchViewControllerHeightPropotion = 0.5f;
+static const CGFloat CardStackTitleBarHeightProportionWhenSearchViewControllerIsVisible = 0.2f;
 
 typedef NS_ENUM(NSUInteger, CardStackPanType) {
     CardStackPanTypeUndefined,
@@ -23,6 +25,8 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
 @property (nonatomic) BOOL isOpen;
 @property (nonatomic) CGRect originalCardFrame;
 @property (nonatomic) CardStackPanType panType;
+@property (nonatomic) CGFloat maximumTotalTitleBarHeightBeforeSearchAppears;
+@property (nonatomic) POPSpringAnimation *searchControllerOpeningAnimation;
 
 @end
 
@@ -133,13 +137,6 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
     }
 }
 
-- (void)setIsOpen:(BOOL)isOpen {
-    _isOpen = isOpen;
-    if (isOpen && !self.isSeachViewControllerHidden) {
-        _isSeachViewControllerHidden = YES;
-    }
-}
-
 #pragma mark - Getters
 
 - (UIColor *)titleBarBackgroundColor {
@@ -187,6 +184,12 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
             self.panType = CardStackPanTypeRemove;
         } else {
             self.panType = CardStackPanTypeOpenOrClose;
+
+            self.maximumTotalTitleBarHeightBeforeSearchAppears = 0;
+            for (NSUInteger index = 0; index < self.currentCardIndex; index++) {
+                CardView *card = [self.cards objectAtIndex:index];
+                self.maximumTotalTitleBarHeightBeforeSearchAppears += (card.titleBarHeight * card.scale - CardStackOffsetToAvoidAreaBelowTheTitleToBecomeVisible) * CardStackMaximumVisibleTitleBarProportion;
+            }
         }
     }
 
@@ -203,6 +206,26 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
             frame.origin.y = y;
             card.frame = frame;
             [self updateCardLocationsWhileOpening];
+
+            BOOL shouldConsiderOpeningSearchController = (self.searchViewController &&
+                                                          self.isSeachViewControllerHidden &&
+                                                          card.tag == self.currentCardIndex);
+            if (shouldConsiderOpeningSearchController) {
+                CGFloat topOfPreviousCard = CardStackTopMargin;
+                if (self.currentCardIndex > 0) {
+                    CardView *previousCard = [self.cards objectAtIndex:self.currentCardIndex - 1];
+                    topOfPreviousCard = previousCard.frame.origin.y;
+                }
+
+                BOOL shouldRevealSearchController = (y > self.maximumTotalTitleBarHeightBeforeSearchAppears);
+                if (shouldRevealSearchController) {
+                    CGRect frame = self.searchViewController.view.frame;
+                    frame.origin.y = ((y - self.maximumTotalTitleBarHeightBeforeSearchAppears) - frame.size.height);
+                    if (frame.origin.y <= 0) {
+                        self.searchViewController.view.frame = frame;
+                    }
+                }
+            }
         }
     } else if (self.panType == CardStackPanTypeRemove) {
         if (card.tag > self.currentCardIndex) {
@@ -229,6 +252,19 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
         if (card.tag == self.currentCardIndex) {
             if (velocity.y < 0.0f) {
                 self.isOpen = NO;
+
+                BOOL shouldCloseSearchController = (self.searchViewController &&
+                                                    !self.isSeachViewControllerHidden &&
+                                                    card.tag == self.currentCardIndex);
+                if (shouldCloseSearchController) {
+                    _isSeachViewControllerHidden = YES;
+                    POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
+                    CGRect frame = self.searchViewController.view.frame;
+                    frame.origin.y = -self.searchViewController.view.frame.size.height;
+                    springAnimation.toValue = [NSValue valueWithCGRect:frame];
+                    springAnimation.springBounciness = 8;
+                    [self.searchViewController.view pop_addAnimation:springAnimation forKey:@"frame"];
+                }
             } else {
                 CGFloat heightAboveCurrentCardWhenOpen = CardStackTopMargin;
                 for (NSUInteger i = 0; i < self.currentCardIndex - 1; i++) {
@@ -236,8 +272,14 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
                     heightAboveCurrentCardWhenOpen += card.titleBarHeight * card.scale;
                 }
                 self.isOpen = (card.frame.origin.y > heightAboveCurrentCardWhenOpen * CardStackOpenIfLargeThanPercent);
+
+                if (self.searchViewController) {
+                    CGFloat heightOfVisiblePortionOfSearchViewController = (self.searchViewController.view.frame.origin.y + self.searchViewController.view.frame.size.height);
+                    _isSeachViewControllerHidden = (heightOfVisiblePortionOfSearchViewController < self.searchViewController.view.frame.size.height * CardStackMinimumSearchViewControllerHeightPropotion);
+                }
             }
             [self updateCardLocationsAnimatedWithVerticalVelocity:velocity.y];
+            [self updateSearchViewControllerLocationAnimatedWithVerticalVelocity:velocity.y];
         } else if (card.tag == self.cards.count - 1) {
             if (velocity.y < 0.0f &&
                 fabs(velocity.y) > CardStackVerticalVelocityLimitWhenMakingCardCurrent) {
@@ -542,6 +584,9 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
         BOOL shouldScaleDownVelocityForUpperCardsAvoidingSpringEffectForCardsNearToTheTop = (verticalVelocity > 0.0f && i <= self.currentCardIndex);
         if (shouldScaleDownVelocityForUpperCardsAvoidingSpringEffectForCardsNearToTheTop) {
             CGFloat springVelocity = (verticalVelocity * card.scale) * ((CGFloat)i / (CGFloat)(self.currentCardIndex + 1));
+            if (self.searchViewController && !self.isSeachViewControllerHidden) {
+                springVelocity *= CardStackTitleBarHeightProportionWhenSearchViewControllerIsVisible;
+            }
             springAnimation.velocity = [NSValue valueWithCGRect:CGRectMake(0, springVelocity, 0, 0)];
         }
         [card pop_addAnimation:springAnimation forKey:@"frame"];
@@ -551,6 +596,9 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
 - (void)updateCardLocationsWhileOpening {
     if (self.currentCardIndex > 0) {
         CGFloat startY = CardStackTopMargin;
+        if (self.searchViewController) {
+            startY += self.searchViewController.view.frame.origin.y + self.searchViewController.view.frame.size.height;
+        }
         CardView *currentCard = [self.cards objectAtIndex:self.currentCardIndex];
         CGFloat endY = currentCard.frame.origin.y;
         CGFloat currentY = startY;
@@ -565,6 +613,17 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
     }
 }
 
+- (void)updateSearchViewControllerLocationAnimatedWithVerticalVelocity:(CGFloat)verticalVelocity {
+    if (self.searchViewController) {
+        POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
+        CGRect frame = self.searchViewController.view.frame;
+        frame.origin.y = (self.isSeachViewControllerHidden ? -self.searchViewController.view.frame.size.height : 0);
+        springAnimation.toValue = [NSValue valueWithCGRect:frame];
+        springAnimation.springBounciness = 8;
+        [self.searchViewController.view pop_addAnimation:springAnimation forKey:@"frame"];
+    }
+}
+
 - (CGRect)frameForCardAtIndex:(NSUInteger)index {
     CGRect frame;
 
@@ -575,9 +634,16 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
     if (index <= self.currentCardIndex) {
         if (self.isOpen) {
             CGFloat previousTitleBarHeights = CardStackTopMargin;
+            if (self.searchViewController && !self.isSeachViewControllerHidden) {
+                previousTitleBarHeights += self.searchViewController.view.frame.size.height;
+            }
             for (NSUInteger i = 0; i < index; i++) {
                 CardView *card = [self.cards objectAtIndex:i];
-                previousTitleBarHeights += (card.titleBarHeight * card.scale - CardStackOffsetToAvoidAreaBelowTheTitleToBecomeVisible);
+                CGFloat titleBarHeight = (card.titleBarHeight * card.scale - CardStackOffsetToAvoidAreaBelowTheTitleToBecomeVisible);
+                if (self.searchViewController && !self.isSeachViewControllerHidden) {
+                    titleBarHeight *= CardStackTitleBarHeightProportionWhenSearchViewControllerIsVisible;
+                }
+                previousTitleBarHeights += titleBarHeight;
             }
 
             CardView *card = [self.cards objectAtIndex:index];
@@ -587,6 +653,9 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
             CardView *card = [self.cards objectAtIndex:index];
             frame = card.frame;
             frame.origin.y = 0;
+            if (self.searchViewController && !self.isSeachViewControllerHidden) {
+                frame.origin.y += self.searchViewController.view.frame.size.height;
+            }
         }
     } else if (shouldCardRemainInvisibleEvenIfLastCardIsMoved) {
         CardView *card = [self.cards objectAtIndex:index];

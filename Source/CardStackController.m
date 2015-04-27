@@ -106,6 +106,13 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
     }
 }
 
+- (void)setTitleLabelVerticalOffset:(CGFloat)titleLabelVerticalOffset {
+    _titleLabelVerticalOffset = titleLabelVerticalOffset;
+    for (CardView *card in self.cards) {
+        card.titleLabelVerticalOffset = titleLabelVerticalOffset;
+    }
+}
+
 - (void)setSearchViewController:(UIViewController *)searchViewController {
     [_searchViewController.view removeFromSuperview];
 

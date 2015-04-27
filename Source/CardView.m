@@ -12,6 +12,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 @property (nonatomic) UITapGestureRecognizer *tapRecognizer;
 
 @property (nonatomic) MASConstraint *titleBarHeightConstraint;
+@property (nonatomic) MASConstraint *titleLabelTopConstraint;
 
 @end
 
@@ -54,7 +55,8 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     }];
 
     [self.titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.center.equalTo(self.titleBarView);
+        self.titleLabelTopConstraint = make.top.equalTo(self.titleBarView.mas_top).with.offset(self.titleLabelVerticalOffset);
+        make.centerX.equalTo(self.titleBarView.mas_centerX);
         make.width.equalTo(self.titleBarView);
         make.height.equalTo(self.titleBarView);
     }];
@@ -168,6 +170,14 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 
     if (self.titleBarHeightConstraint) {
         self.titleBarHeightConstraint.offset(titleBarHeight);
+    }
+}
+
+- (void)setTitleLabelVerticalOffset:(CGFloat)titleLabelVerticalOffset {
+    _titleLabelVerticalOffset = titleLabelVerticalOffset;
+
+    if (self.titleLabelTopConstraint) {
+        self.titleLabelTopConstraint.offset(titleLabelVerticalOffset);
     }
 }
 

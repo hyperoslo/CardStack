@@ -1,4 +1,5 @@
 #import "CardView.h"
+#import "Masonry.h"
 
 static const CGFloat CardTitleBarHeight = 44.0f;
 
@@ -9,6 +10,8 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 @property (nonatomic) UIView *titleBarView;
 @property (nonatomic) UILabel *titleLabel;
 @property (nonatomic) UITapGestureRecognizer *tapRecognizer;
+
+@property (nonatomic) MASConstraint *titleBarHeightConstraint;
 
 @end
 
@@ -37,9 +40,24 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     self = [super initWithFrame:frame];
     if (!self) return nil;
 
+    self.titleBarHeight = CardTitleBarHeight;
+
     [self addSubview:self.contentView];
     [self.contentView addSubview:self.titleBarView];
     [self.titleBarView addSubview:self.titleLabel];
+
+    [self.titleBarView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.contentView.mas_left);
+        make.right.equalTo(self.contentView.mas_right);
+        make.top.equalTo(self.contentView.mas_top);
+        self.titleBarHeightConstraint = make.height.equalTo(@(self.titleBarHeight));
+    }];
+
+    [self.titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.center.equalTo(self.titleBarView);
+        make.width.equalTo(self.titleBarView);
+        make.height.equalTo(self.titleBarView);
+    }];
 
     // using shadows drops frame rate noticeably even on an iPhone 6
     // self.layer.shadowColor = [[UIColor blackColor] CGColor];
@@ -49,10 +67,6 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 }
 
 #pragma mark - Getters
-
-- (CGFloat)titleBarHeight {
-    return CardTitleBarHeight;
-}
 
 - (UIColor *)titleBarBackgroundColor {
     return self.titleBarView.backgroundColor;
@@ -147,6 +161,14 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 - (void)setTitle:(NSString *)title {
     _title = title;
     self.titleLabel.text = title;
+}
+
+- (void)setTitleBarHeight:(CGFloat)titleBarHeight {
+    _titleBarHeight = titleBarHeight;
+
+    if (self.titleBarHeightConstraint) {
+        self.titleBarHeightConstraint.offset(titleBarHeight);
+    }
 }
 
 - (void)setViewController:(UIViewController *)viewController {

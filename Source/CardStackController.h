@@ -13,6 +13,7 @@
 @property (nonatomic) UIColor *titleBarBackgroundColor;
 @property (nonatomic) UIColor *titleColor;
 @property (nonatomic) UIFont *titleFont;
+@property (nonatomic) CGFloat titleBarHeight;
 
 @property (nonatomic) UIViewController *searchViewController;
 @property (nonatomic) BOOL isSeachViewControllerHidden;

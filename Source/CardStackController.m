@@ -12,6 +12,7 @@ static const CGFloat CardStackOffsetToAvoidAreaBelowTheTitleToBecomeVisible = 1.
 static const CGFloat CardStackMaximumVisibleTitleBarProportion = 1.3f;
 static const CGFloat CardStackMinimumSearchViewControllerHeightPropotion = 0.5f;
 static const CGFloat CardStackTitleBarHeightProportionWhenSearchViewControllerIsVisible = 0.2f;
+static const CGFloat CardStackTitleBarHeight = 44.0f;
 
 typedef NS_ENUM(NSUInteger, CardStackPanType) {
     CardStackPanTypeUndefined,
@@ -40,6 +41,7 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
     if (!self) return nil;
 
     self.isSeachViewControllerHidden = YES;
+    self.titleBarHeight = CardStackTitleBarHeight;
 
     return self;
 }
@@ -64,6 +66,7 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
     for (CardView *card in self.cards) {
         card.delegate = self;
         card.titleFont = self.titleFont;
+        card.titleBarHeight = self.titleBarHeight;
         [self.view addSubview:card];
     }
 
@@ -93,6 +96,13 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
     _titleFont = titleFont;
     for (CardView *card in self.cards) {
         card.titleFont = titleFont;
+    }
+}
+
+- (void)setTitleBarHeight:(CGFloat)titleBarHeight {
+    _titleBarHeight = titleBarHeight;
+    for (CardView *card in self.cards) {
+        card.titleBarHeight = titleBarHeight;
     }
 }
 
@@ -379,6 +389,7 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
     card.title = title;
     card.titleFont = self.titleFont;
     card.titleBarBackgroundColor = self.titleBarBackgroundColor;
+    card.titleBarHeight = self.titleBarHeight;
     NSMutableArray *mutableCards = [self.cards mutableCopy];
     [mutableCards insertObject:card atIndex:index];
     self.cards = [mutableCards copy];
@@ -442,6 +453,7 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
     card.title = title;
     card.titleFont = self.titleFont;
     card.titleBarBackgroundColor = self.titleBarBackgroundColor;
+    card.titleBarHeight = self.titleBarHeight;
     NSMutableArray *mutableCards = [self.cards mutableCopy];
     [mutableCards insertObject:card atIndex:index + 1];
     self.cards = [mutableCards copy];

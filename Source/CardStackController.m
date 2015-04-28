@@ -40,8 +40,8 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
     self = [super init];
     if (!self) return nil;
 
-    self.isSeachViewControllerHidden = YES;
-    self.titleBarHeight = CardStackTitleBarHeight;
+    _isSeachViewControllerHidden = YES;
+    _titleBarHeight = CardStackTitleBarHeight;
 
     return self;
 }

@@ -339,15 +339,14 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
 }
 
 - (NSUInteger)indexForViewController:(UIViewController *)viewController {
-    NSUInteger index;
-
-    for (index = 0; index < self.viewControllers.count; index++) {
-        if ([[self.viewControllers objectAtIndex:index] isEqual:viewController]) {
-            break;
-        }
-    }
-
-    return index;
+    __block NSInteger foundIndex;
+    
+    [self.viewControllers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        foundIndex = idx;
+        *stop = [obj isEqual:viewController];
+    }];
+    
+    return foundIndex;
 }
 
 - (void)insertCardWithViewController:(UIViewController *)viewController

@@ -2,6 +2,7 @@
 #import "Masonry.h"
 
 static const CGFloat CardTitleBarHeight = 44.0f;
+static const CGFloat CardCornerRadius = 4.0f;
 
 @interface CardView ()
 
@@ -94,7 +95,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     if (_contentView) return _contentView;
 
     _contentView = [[UIView alloc] initWithFrame:self.bounds];
-    _contentView.layer.cornerRadius = 4.0f;
+    _contentView.layer.cornerRadius = CardCornerRadius;
     _contentView.clipsToBounds = YES;
 
     return _contentView;
@@ -104,8 +105,10 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     if (_titleBarView) return _titleBarView;
 
     _titleBarView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.titleBarHeight)];
-    _titleBarView.backgroundColor = [UIColor orangeColor];
+    _titleBarView.backgroundColor = self.titleBarBackgroundColor;
     _titleBarView.userInteractionEnabled = YES;
+    _titleBarView.layer.cornerRadius = CardCornerRadius;
+    _titleBarView.clipsToBounds = YES;
     [_titleBarView addGestureRecognizer:self.tapRecognizer];
     [_titleBarView addGestureRecognizer:self.panRecognizer];
 

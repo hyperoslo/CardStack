@@ -555,18 +555,11 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
 }
 
 - (void)updateCardTitleBarBackgroundColors {
-    UIColor *titleBarBackgroundColor = self.titleBarBackgroundColor;
-    CGFloat red;
-    CGFloat green;
-    CGFloat blue;
-    [titleBarBackgroundColor getRed:&red green:&green blue:&blue alpha:nil];
-
     for (NSUInteger i = 0; i < self.cards.count; i++) {
-        NSInteger offset = (i - self.cards.count + 1);
-        CGFloat colorOffset = offset * CardStackTitleBarBackgroundColorOffset;
-        UIColor *modifiedColor = [UIColor colorWithRed:red + colorOffset green:green + colorOffset blue:blue + colorOffset alpha:1.0];
         CardView *card = [self.cards objectAtIndex:i];
-        card.titleBarBackgroundColor = modifiedColor;
+        if ([self.dataSource respondsToSelector:@selector(cardStackController:titleBarDecorationColorForCardAtIndex:)]) {
+            card.titleBarDecorationColor = [self.dataSource cardStackController:self titleBarDecorationColorForCardAtIndex:i];
+        }
     }
 }
 

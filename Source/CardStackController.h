@@ -2,10 +2,12 @@
 #import "CardView.h"
 
 @protocol CardStackControllerDelegate;
+@protocol CardStackControllerDataSource;
 
 @interface CardStackController : UIViewController
 
 @property (weak, nonatomic) id<CardStackControllerDelegate> delegate;
+@property (weak, nonatomic) id<CardStackControllerDataSource> dataSource;
 
 @property (nonatomic) NSArray *cards;
 @property (nonatomic) NSArray *viewControllers;
@@ -53,5 +55,12 @@
 - (void)cardStackControllerWillClose:(CardStackController *)cardStackController;
 - (void)cardStackControllerDidOpen:(CardStackController *)cardStackController;
 - (void)cardStackControllerDidClose:(CardStackController *)cardStackController;
+
+@end
+
+@protocol CardStackControllerDataSource <NSObject>
+
+@optional
+- (UIColor *)cardStackController:(CardStackController *)cardStackController titleBarDecorationColorForCardAtIndex:(NSUInteger)index;
 
 @end

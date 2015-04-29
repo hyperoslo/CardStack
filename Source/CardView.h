@@ -9,6 +9,7 @@
 
 @property (nonatomic) CGFloat scale;
 @property (nonatomic) UIColor *titleBarBackgroundColor;
+@property (nonatomic) UIColor *titleBarDecorationColor;
 @property (nonatomic) UIColor *titleColor;
 @property (nonatomic) UIFont *titleFont;
 @property (nonatomic) NSString *title;

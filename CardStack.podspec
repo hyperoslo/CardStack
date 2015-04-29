@@ -10,5 +10,6 @@ Pod::Spec.new do |s|
   s.platform     = :ios, '7.0'
   s.requires_arc = true
   s.source_files = 'Source/**/*'
-   s.dependency 'pop', '~> 1.0'
+  s.dependency 'pop', '~> 1.0'
+  s.dependency 'Masonry', '~> 0.6'
 end

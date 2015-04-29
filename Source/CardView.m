@@ -1,6 +1,8 @@
 #import "CardView.h"
+#import "Masonry.h"
 
 static const CGFloat CardTitleBarHeight = 44.0f;
+static const CGFloat CardCornerRadius = 4.0f;
 
 @interface CardView ()
 
@@ -10,6 +12,9 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 @property (nonatomic) UIView *titleBarDecorationView;
 @property (nonatomic) UILabel *titleLabel;
 @property (nonatomic) UITapGestureRecognizer *tapRecognizer;
+
+@property (nonatomic) MASConstraint *titleBarHeightConstraint;
+@property (nonatomic) MASConstraint *titleLabelTopConstraint;
 
 @end
 
@@ -39,10 +44,26 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     self = [super initWithFrame:frame];
     if (!self) return nil;
 
+    self.titleBarHeight = CardTitleBarHeight;
+
     [self addSubview:self.contentView];
     [self.contentView addSubview:self.titleBarView];
     [self.titleBarView addSubview:self.titleBarDecorationView];
     [self.titleBarView addSubview:self.titleLabel];
+
+    [self.titleBarView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.contentView.mas_left);
+        make.right.equalTo(self.contentView.mas_right);
+        make.top.equalTo(self.contentView.mas_top);
+        self.titleBarHeightConstraint = make.height.equalTo(@(self.titleBarHeight));
+    }];
+
+    [self.titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        self.titleLabelTopConstraint = make.top.equalTo(self.titleBarView.mas_top).with.offset(self.titleLabelVerticalOffset);
+        make.centerX.equalTo(self.titleBarView.mas_centerX);
+        make.width.equalTo(self.titleBarView);
+        make.height.equalTo(self.titleBarView);
+    }];
 
     // using shadows drops frame rate noticeably even on an iPhone 6
     // self.layer.shadowColor = [[UIColor blackColor] CGColor];
@@ -52,10 +73,6 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 }
 
 #pragma mark - Getters
-
-- (CGFloat)titleBarHeight {
-    return CardTitleBarHeight;
-}
 
 - (UIColor *)titleBarBackgroundColor {
     return self.titleBarView.backgroundColor;
@@ -89,7 +106,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     if (_contentView) return _contentView;
 
     _contentView = [[UIView alloc] initWithFrame:self.bounds];
-    _contentView.layer.cornerRadius = 4.0f;
+    _contentView.layer.cornerRadius = CardCornerRadius;
     _contentView.clipsToBounds = YES;
 
     return _contentView;
@@ -99,8 +116,10 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     if (_titleBarView) return _titleBarView;
 
     _titleBarView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.titleBarHeight)];
-    _titleBarView.backgroundColor = [UIColor orangeColor];
+    _titleBarView.backgroundColor = self.titleBarBackgroundColor;
     _titleBarView.userInteractionEnabled = YES;
+    _titleBarView.layer.cornerRadius = CardCornerRadius;
+    _titleBarView.clipsToBounds = YES;
     [_titleBarView addGestureRecognizer:self.tapRecognizer];
     [_titleBarView addGestureRecognizer:self.panRecognizer];
 
@@ -172,6 +191,22 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 - (void)setTitle:(NSString *)title {
     _title = title;
     self.titleLabel.text = title;
+}
+
+- (void)setTitleBarHeight:(CGFloat)titleBarHeight {
+    _titleBarHeight = titleBarHeight;
+
+    if (self.titleBarHeightConstraint) {
+        self.titleBarHeightConstraint.offset(titleBarHeight);
+    }
+}
+
+- (void)setTitleLabelVerticalOffset:(CGFloat)titleLabelVerticalOffset {
+    _titleLabelVerticalOffset = titleLabelVerticalOffset;
+
+    if (self.titleLabelTopConstraint) {
+        self.titleLabelTopConstraint.offset(titleLabelVerticalOffset);
+    }
 }
 
 - (void)setViewController:(UIViewController *)viewController {

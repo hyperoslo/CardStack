@@ -14,8 +14,8 @@
 @property (nonatomic) UIFont *titleFont;
 @property (nonatomic) NSString *title;
 @property (nonatomic) UIPanGestureRecognizer *panRecognizer;
-
-@property (nonatomic, readonly) CGFloat titleBarHeight;
+@property (nonatomic) CGFloat titleBarHeight;
+@property (nonatomic) CGFloat titleLabelVerticalOffset;
 
 + (CardView *)cardWithViewController:(UIViewController *)viewController;
 + (NSArray *)cardsWithViewControllers:(NSArray *)viewControllers;

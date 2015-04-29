@@ -34,6 +34,7 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
     self.cardStackController = [CardStackController new];
     self.cardStackController.delegate = self;
     self.cardStackController.dataSource = self;
+    self.cardStackController.titleBarBackgroundColor = [UIColor orangeColor];
     self.cardStackController.viewControllers = self.viewControllers;
     for (NSUInteger i = 0; i < self.cardStackController.cards.count; i++) {
         CardView *card = [self.cardStackController.cards objectAtIndex:i];

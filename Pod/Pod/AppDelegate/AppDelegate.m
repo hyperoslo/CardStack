@@ -9,7 +9,7 @@ static const CGFloat ExampleTopMargin = 64.0f;
 static const CGFloat ExampleMargin = 10.0f;
 static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
 
-@interface AppDelegate () <CardStackControllerDelegate>
+@interface AppDelegate () <CardStackControllerDelegate, CardStackControllerDataSource>
 
 @property (nonatomic) CardStackController *cardStackController;
 @property (nonatomic) NSMutableArray *viewControllers;
@@ -33,6 +33,7 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
 
     self.cardStackController = [CardStackController new];
     self.cardStackController.delegate = self;
+    self.cardStackController.dataSource = self;
     self.cardStackController.viewControllers = self.viewControllers;
     for (NSUInteger i = 0; i < self.cardStackController.cards.count; i++) {
         CardView *card = [self.cardStackController.cards objectAtIndex:i];
@@ -60,6 +61,12 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
     [self.window makeKeyAndVisible];
 
     return YES;
+}
+
+#pragma mark - CardStackControllerDataSource
+
+- (UIColor *)cardStackController:(CardStackController *)cardStackController titleBarDecorationColorForCardAtIndex:(NSUInteger)index {
+    return [UIColor colorWithRed:1 green:0 blue:0 alpha:(CGFloat)index / (CGFloat)cardStackController.cards.count];
 }
 
 #pragma mark - Other methods

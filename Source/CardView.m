@@ -7,6 +7,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 @property (nonatomic) UIViewController *viewController;
 @property (nonatomic) UIView *contentView;
 @property (nonatomic) UIView *titleBarView;
+@property (nonatomic) UIView *titleBarDecorationView;
 @property (nonatomic) UILabel *titleLabel;
 @property (nonatomic) UITapGestureRecognizer *tapRecognizer;
 
@@ -16,6 +17,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 
 @synthesize titleColor = _titleColor;
 @synthesize titleFont = _titleFont;
+@synthesize titleBarDecorationColor = _titleBarDecorationColor;
 
 + (CardView *)cardWithViewController:(UIViewController *)viewController {
     CardView *card = [[CardView alloc] initWithFrame:[UIScreen mainScreen].bounds];
@@ -39,6 +41,7 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 
     [self addSubview:self.contentView];
     [self.contentView addSubview:self.titleBarView];
+    [self.titleBarView addSubview:self.titleBarDecorationView];
     [self.titleBarView addSubview:self.titleLabel];
 
     // using shadows drops frame rate noticeably even on an iPhone 6
@@ -56,6 +59,14 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 
 - (UIColor *)titleBarBackgroundColor {
     return self.titleBarView.backgroundColor;
+}
+
+- (UIColor *)titleBarDecorationColor {
+    if (_titleBarDecorationColor) return _titleBarDecorationColor;
+
+    _titleBarDecorationColor = [UIColor clearColor];
+
+    return _titleBarDecorationColor;
 }
 
 - (UIColor *)titleColor {
@@ -96,6 +107,15 @@ static const CGFloat CardTitleBarHeight = 44.0f;
     return _titleBarView;
 }
 
+- (UIView *)titleBarDecorationView {
+    if (_titleBarDecorationView) return _titleBarDecorationView;
+
+    _titleBarDecorationView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.titleBarHeight)];
+    _titleBarDecorationView.backgroundColor = self.titleBarDecorationColor;
+
+    return _titleBarDecorationView;
+}
+
 - (UILabel *)titleLabel {
     if (_titleLabel) return _titleLabel;
 
@@ -132,6 +152,11 @@ static const CGFloat CardTitleBarHeight = 44.0f;
 
 - (void)setTitleBarBackgroundColor:(UIColor *)titleBarBackgroundColor {
     self.titleBarView.backgroundColor = titleBarBackgroundColor;
+}
+
+- (void)setTitleBarDecorationColor:(UIColor *)titleBarDecorationColor {
+    _titleBarDecorationColor = titleBarDecorationColor;
+    self.titleBarDecorationView.backgroundColor = titleBarDecorationColor;
 }
 
 - (void)setTitleColor:(UIColor *)titleColor {

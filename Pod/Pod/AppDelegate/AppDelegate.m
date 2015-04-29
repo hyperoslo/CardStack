@@ -22,6 +22,8 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
 
     self.viewControllers = [NSMutableArray new];
@@ -55,6 +57,7 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
 
     self.window.rootViewController = self.cardStackController;
     self.window.backgroundColor = [UIColor clearColor];
+    [self.window makeKeyAndVisible];
 
     return YES;
 }

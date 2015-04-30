@@ -579,6 +579,12 @@ typedef NS_ENUM(NSUInteger, CardStackPanType) {
         if ([self.dataSource respondsToSelector:@selector(cardStackController:titleBarDecorationColorForCardAtIndex:)]) {
             card.titleBarDecorationColor = [self.dataSource cardStackController:self titleBarDecorationColorForCardAtIndex:i];
         }
+        if ([self.dataSource respondsToSelector:@selector(cardStackController:titleBarShadowImageForCardAtIndex:)]) {
+            card.titleBarShadowImage = [self.dataSource cardStackController:self titleBarShadowImageForCardAtIndex:i];
+        }
+        if ([self.dataSource respondsToSelector:@selector(cardStackController:titleBarShineImageForCardAtIndex:)]) {
+            card.titleBarShineImage = [self.dataSource cardStackController:self titleBarShineImageForCardAtIndex:i];
+        }
     }
 }
 

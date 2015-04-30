@@ -6,6 +6,7 @@ Pod::Spec.new do |s|
   s.license          = 'MIT'
   s.author           = { "Hyper Interaktiv AS" => "ios@hyper.no" }
   s.source           = { :git => "https://github.com/hyperoslo/CardStack.git", :tag => s.version.to_s }
+  s.resource_bundles = { 'CardStack' => ['Assets/*.{png}'] }
   s.social_media_url = 'https://twitter.com/hyperoslo'
   s.platform     = :ios, '7.0'
   s.requires_arc = true

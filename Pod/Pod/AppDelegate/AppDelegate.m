@@ -69,6 +69,14 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
     return [UIColor colorWithRed:1 green:0 blue:0 alpha:(CGFloat)index / (CGFloat)cardStackController.cards.count];
 }
 
+- (UIImage *)cardStackController:(CardStackController *)cardStackController titleBarShadowImageForCardAtIndex:(NSUInteger)index {
+    return [UIImage imageNamed:@"card_shadow.png"];
+}
+
+- (UIImage *)cardStackController:(CardStackController *)cardStackController titleBarShineImageForCardAtIndex:(NSUInteger)index {
+    return [UIImage imageNamed:@"card_shine.png"];
+}
+
 #pragma mark - Other methods
 
 - (UIViewController *)createNewTestViewControllerWithTag:(NSInteger)tag {

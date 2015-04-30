@@ -351,24 +351,24 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
 
     if (animated) {
         [UIView animateWithDuration:0.5 animations:^{
-            [self updateCardScales];
-            [self updateCardLocations];
-            [self updateCardTitleBarBackgroundColors];
             if (!makeCurrent) {
                 self.currentCardIndex = index + 1;
             }
+            [self updateCardScales];
+            [self updateCardLocations];
+            [self updateCardTitleBarBackgroundColors];
         } completion:^(BOOL finished) {
             if (completion) {
                 completion();
             }
         }];
     } else {
-        [self updateCardScales];
-        [self updateCardLocations];
-        [self updateCardTitleBarBackgroundColors];
         if (!makeCurrent) {
             self.currentCardIndex = index + 1;
         }
+        [self updateCardScales];
+        [self updateCardLocations];
+        [self updateCardTitleBarBackgroundColors];
         if (completion) {
             completion();
         }
@@ -418,24 +418,24 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
 
     if (animated) {
         [UIView animateWithDuration:0.5 animations:^{
-            [self updateCardScales];
-            [self updateCardLocations];
-            [self updateCardTitleBarBackgroundColors];
             if (makeCurrent) {
                 self.currentCardIndex = index + 1;
             }
+            [self updateCardScales];
+            [self updateCardLocations];
+            [self updateCardTitleBarBackgroundColors];
         } completion:^(BOOL finished) {
             if (completion) {
                 completion();
             }
         }];
     } else {
-        [self updateCardScales];
-        [self updateCardLocations];
-        [self updateCardTitleBarBackgroundColors];
         if (makeCurrent) {
             self.currentCardIndex = index + 1;
         }
+        [self updateCardScales];
+        [self updateCardLocations];
+        [self updateCardTitleBarBackgroundColors];
         if (completion) {
             completion();
         }
@@ -470,12 +470,12 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
             if (self.cards.count == 1 && self.isOpen) {
                 self.isOpen = NO;
             }
-            [self updateCardScales];
-            [self updateCardLocations];
-            [self updateCardTitleBarBackgroundColors];
             if (self.currentCardIndex > 0 && self.currentCardIndex > self.cards.count - 1) {
                 self.currentCardIndex = self.cards.count - 1;
             }
+            [self updateCardScales];
+            [self updateCardLocations];
+            [self updateCardTitleBarBackgroundColors];
 
             CGRect frame = card.frame;
             frame.origin.x = frame.origin.x + self.view.bounds.size.width;
@@ -492,12 +492,12 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
         if (self.cards.count == 1 && self.isOpen) {
             self.isOpen = NO;
         }
-        [self updateCardScales];
-        [self updateCardLocations];
-        [self updateCardTitleBarBackgroundColors];
         if (self.currentCardIndex > 0 && self.currentCardIndex > self.cards.count - 1) {
             self.currentCardIndex = self.cards.count - 1;
         }
+        [self updateCardScales];
+        [self updateCardLocations];
+        [self updateCardTitleBarBackgroundColors];
         [card removeFromSuperview];
         if (completion) {
             completion();

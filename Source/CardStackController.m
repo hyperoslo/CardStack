@@ -300,11 +300,12 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
 }
 
 - (NSUInteger)indexForViewController:(UIViewController *)viewController {
-    __block NSInteger foundIndex;
-
+    __block NSInteger foundIndex = NSNotFound;
     [self.viewControllers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        foundIndex = idx;
         *stop = [obj isEqual:viewController];
+        if (*stop) {
+            foundIndex = idx;
+        }
     }];
 
     return foundIndex;

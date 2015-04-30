@@ -35,6 +35,10 @@
                             animated:(BOOL)animated
                       withCompletion:(void(^)())completion;
 
+- (void)removeCardAtIndex:(NSUInteger)index
+                 animated:(BOOL)animated
+           withCompletion:(void(^)())completion;
+
 - (void)setIsSeachViewControllerHidden:(BOOL)isSeachViewControllerHidden
                               animated:(BOOL)animated
                         withCompletion:(void(^)())completion;

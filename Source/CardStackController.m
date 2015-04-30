@@ -442,6 +442,69 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
     }
 }
 
+- (void)removeCardAtIndex:(NSUInteger)index
+                 animated:(BOOL)animated
+           withCompletion:(void(^)())completion {
+    if (self.cards.count < 2 || index > self.cards.count - 1) {
+        return;
+    }
+
+    BOOL shouldAvoidUnwantedAnimationIfTopmostCardIsRemoved = (!self.isOpen);
+    if (shouldAvoidUnwantedAnimationIfTopmostCardIsRemoved) {
+        animated = NO;
+    }
+
+    NSMutableArray *mutableViewControllers = [self.viewControllers mutableCopy];
+    [mutableViewControllers removeObjectAtIndex:index];
+
+    // don't user setter to avoid full rebuild
+    _viewControllers = [mutableViewControllers copy];
+
+    __block CardView *card = [self.cards objectAtIndex:index];
+    NSMutableArray *mutableCards = [self.cards mutableCopy];
+    [mutableCards removeObjectAtIndex:index];
+    self.cards = [mutableCards copy];
+
+    if (animated) {
+        [UIView animateWithDuration:0.5 animations:^{
+            if (self.cards.count == 1 && self.isOpen) {
+                self.isOpen = NO;
+            }
+            [self updateCardScales];
+            [self updateCardLocations];
+            [self updateCardTitleBarBackgroundColors];
+            if (self.currentCardIndex > 0 && self.currentCardIndex > self.cards.count - 1) {
+                self.currentCardIndex = self.cards.count - 1;
+            }
+
+            CGRect frame = card.frame;
+            frame.origin.x = frame.origin.x + self.view.bounds.size.width;
+            card.frame = frame;
+        } completion:^(BOOL finished) {
+            // removal from superview is diferred to make sure a proper removal animation is visible
+            [card removeFromSuperview];
+
+            if (completion) {
+                completion();
+            }
+        }];
+    } else {
+        if (self.cards.count == 1 && self.isOpen) {
+            self.isOpen = NO;
+        }
+        [self updateCardScales];
+        [self updateCardLocations];
+        [self updateCardTitleBarBackgroundColors];
+        if (self.currentCardIndex > 0 && self.currentCardIndex > self.cards.count - 1) {
+            self.currentCardIndex = self.cards.count - 1;
+        }
+        [card removeFromSuperview];
+        if (completion) {
+            completion();
+        }
+    }
+}
+
 - (void)updateCardScales {
     NSUInteger index = 0;
     for (CardView *card in self.cards) {

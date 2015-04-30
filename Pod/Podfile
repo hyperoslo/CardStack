@@ -2,5 +2,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 platform :ios, '7.0'
 
+link_with 'Pod', 'Tests'
+
 pod 'Masonry', '~> 0.6'
 pod 'pop'

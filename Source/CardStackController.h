@@ -2,10 +2,12 @@
 #import "CardView.h"
 
 @protocol CardStackControllerDelegate;
+@protocol CardStackControllerDataSource;
 
 @interface CardStackController : UIViewController
 
 @property (weak, nonatomic) id<CardStackControllerDelegate> delegate;
+@property (weak, nonatomic) id<CardStackControllerDataSource> dataSource;
 
 @property (nonatomic) NSArray *cards;
 @property (nonatomic) NSArray *viewControllers;
@@ -13,6 +15,8 @@
 @property (nonatomic) UIColor *titleBarBackgroundColor;
 @property (nonatomic) UIColor *titleColor;
 @property (nonatomic) UIFont *titleFont;
+@property (nonatomic) CGFloat titleBarHeight;
+@property (nonatomic) CGFloat titleLabelVerticalOffset;
 
 @property (nonatomic) UIViewController *searchViewController;
 @property (nonatomic) BOOL isSeachViewControllerHidden;
@@ -30,10 +34,6 @@
                          makeCurrent:(BOOL)makeCurrent
                             animated:(BOOL)animated
                       withCompletion:(void(^)())completion;
-
-- (void)removeCardAtIndex:(NSUInteger)index
-                 animated:(BOOL)animated
-           withCompletion:(void(^)())completion;
 
 - (void)setIsSeachViewControllerHidden:(BOOL)isSeachViewControllerHidden
                               animated:(BOOL)animated
@@ -53,5 +53,14 @@
 - (void)cardStackControllerWillClose:(CardStackController *)cardStackController;
 - (void)cardStackControllerDidOpen:(CardStackController *)cardStackController;
 - (void)cardStackControllerDidClose:(CardStackController *)cardStackController;
+
+@end
+
+@protocol CardStackControllerDataSource <NSObject>
+
+@optional
+- (UIColor *)cardStackController:(CardStackController *)cardStackController titleBarDecorationColorForCardAtIndex:(NSUInteger)index;
+- (UIImage *)cardStackController:(CardStackController *)cardStackController titleBarShadowImageForCardAtIndex:(NSUInteger)index;
+- (UIImage *)cardStackController:(CardStackController *)cardStackController titleBarShineImageForCardAtIndex:(NSUInteger)index;
 
 @end

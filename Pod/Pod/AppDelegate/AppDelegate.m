@@ -70,11 +70,11 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
 }
 
 - (UIImage *)cardStackController:(CardStackController *)cardStackController titleBarShadowImageForCardAtIndex:(NSUInteger)index {
-    return [UIImage imageNamed:@"titleBarShadowImage.png"];
+    return [UIImage imageNamed:@"card_shadow.png"];
 }
 
 - (UIImage *)cardStackController:(CardStackController *)cardStackController titleBarShineImageForCardAtIndex:(NSUInteger)index {
-    return [UIImage imageNamed:@"titleBarShineImage.png"];
+    return [UIImage imageNamed:@"card_shine.png"];
 }
 
 #pragma mark - Other methods

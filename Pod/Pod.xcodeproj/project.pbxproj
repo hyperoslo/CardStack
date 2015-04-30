@@ -13,6 +13,8 @@
 		146D72B31AB782920058798C /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 146D72B21AB782920058798C /* Tests.m */; };
 		147872E71AE542020091AE1D /* CardView.m in Sources */ = {isa = PBXBuildFile; fileRef = 147872E61AE542020091AE1D /* CardView.m */; };
 		332C1F8F69719E0E7DE34A23 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 47DD127F087D98A0D25096AC /* libPods.a */; };
+		9A3F16FF1AF228E100229577 /* card_shadow.png in Resources */ = {isa = PBXBuildFile; fileRef = 9A3F16FD1AF228E100229577 /* card_shadow.png */; };
+		9A3F17001AF228E100229577 /* card_shine.png in Resources */ = {isa = PBXBuildFile; fileRef = 9A3F16FE1AF228E100229577 /* card_shine.png */; };
 		9AC5E5401ADC009300FE1E0D /* CardStackController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9AC5E53F1ADC009300FE1E0D /* CardStackController.m */; };
 /* End PBXBuildFile section */
 
@@ -45,6 +47,8 @@
 		14946611115390DFF8D31297 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		31CB67FA653DFCAE806222A3 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		47DD127F087D98A0D25096AC /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		9A3F16FD1AF228E100229577 /* card_shadow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = card_shadow.png; sourceTree = "<group>"; };
+		9A3F16FE1AF228E100229577 /* card_shine.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = card_shine.png; sourceTree = "<group>"; };
 		9AC5E53E1ADC009300FE1E0D /* CardStackController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CardStackController.h; sourceTree = "<group>"; };
 		9AC5E53F1ADC009300FE1E0D /* CardStackController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CardStackController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -112,6 +116,7 @@
 		146D728A1AB782920058798C = {
 			isa = PBXGroup;
 			children = (
+				9A3F16FC1AF228E100229577 /* Assets */,
 				145049791AB785C700D9745F /* Source */,
 				145049701AB7859600D9745F /* Metadata */,
 				146D72951AB782920058798C /* Pod */,
@@ -165,6 +170,16 @@
 				146D72B11AB782920058798C /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		9A3F16FC1AF228E100229577 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				9A3F16FD1AF228E100229577 /* card_shadow.png */,
+				9A3F16FE1AF228E100229577 /* card_shine.png */,
+			);
+			name = Assets;
+			path = ../Assets;
 			sourceTree = "<group>";
 		};
 		D0AEA67F93773348378C9B9A /* Frameworks */ = {
@@ -256,7 +271,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9A3F17001AF228E100229577 /* card_shine.png in Resources */,
 				146D72A41AB782920058798C /* Images.xcassets in Resources */,
+				9A3F16FF1AF228E100229577 /* card_shadow.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

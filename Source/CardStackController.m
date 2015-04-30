@@ -458,6 +458,7 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
 - (void)updateCardTitleBarBackgroundColors {
     for (NSUInteger i = 0; i < self.cards.count; i++) {
         CardView *card = [self.cards objectAtIndex:i];
+        card.titleBarBackgroundColor = self.titleBarBackgroundColor;
         if ([self.dataSource respondsToSelector:@selector(cardStackController:titleBarDecorationColorForCardAtIndex:)]) {
             card.titleBarDecorationColor = [self.dataSource cardStackController:self titleBarDecorationColorForCardAtIndex:i];
         }

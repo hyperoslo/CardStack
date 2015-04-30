@@ -64,5 +64,7 @@
 
 @optional
 - (UIColor *)cardStackController:(CardStackController *)cardStackController titleBarDecorationColorForCardAtIndex:(NSUInteger)index;
+- (UIImage *)cardStackController:(CardStackController *)cardStackController titleBarShadowImageForCardAtIndex:(NSUInteger)index;
+- (UIImage *)cardStackController:(CardStackController *)cardStackController titleBarShineImageForCardAtIndex:(NSUInteger)index;
 
 @end

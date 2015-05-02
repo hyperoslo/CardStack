@@ -254,9 +254,11 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
             }
         } else {
             CGFloat heightAboveCurrentCardWhenOpen = CardStackTopMargin;
-            for (NSUInteger i = 0; i < self.currentCardIndex - 1; i++) {
-                CardView *card = [self.cards objectAtIndex:i];
-                heightAboveCurrentCardWhenOpen += card.titleBarHeight * card.scale;
+            if(self.currentCardIndex > 0){
+                for (NSUInteger i = 0; i < self.currentCardIndex - 1; i++) {
+                    CardView *card = [self.cards objectAtIndex:i];
+                    heightAboveCurrentCardWhenOpen += card.titleBarHeight * card.scale;
+                }
             }
             self.isOpen = (card.frame.origin.y > heightAboveCurrentCardWhenOpen * CardStackOpenIfLargeThanPercent);
 

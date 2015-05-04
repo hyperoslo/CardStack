@@ -188,43 +188,21 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
 }
 
 - (void)card:(CardView *)card titlePannedByDelta:(CGPoint)delta {
-    self.maximumTotalTitleBarHeightBeforeSearchAppears = 0;
-    for (NSUInteger index = 0; index < self.currentCardIndex; index++) {
-        CardView *card = [self.cards objectAtIndex:index];
-        self.maximumTotalTitleBarHeightBeforeSearchAppears += (card.titleBarHeight * card.scale - CardStackOffsetToAvoidAreaBelowTheTitleToBecomeVisible) * CardStackMaximumVisibleTitleBarProportion;
-    }
-
-    if ((card.tag != self.currentCardIndex &&
-        card.tag != self.cards.count - 1) ||
-        self.cards.count == 1) {
+    [self calculateMaximumTotalTitleBarHeightBeforeSearchAppears];
+    if ([self thisIsNotTheCorrectCard:card]) {
         return;
     }
 
-    CGFloat y = self.originalCardFrame.origin.y + delta.y;
-    if (y >= 0.0f) {
+    CGFloat possibleCardFrameY = self.originalCardFrame.origin.y + delta.y;
+
+    if (![self frameMoveExceedsTheTop:possibleCardFrameY]) {
         CGRect frame = self.originalCardFrame;
-        frame.origin.y = y;
+        frame.origin.y = possibleCardFrameY;
         card.frame = frame;
         [self updateCardLocationsWhileOpening];
-
-        BOOL shouldConsiderOpeningSearchController = (self.searchViewController &&
-                                                      self.isSeachViewControllerHidden &&
-                                                      card.tag == self.currentCardIndex);
-        if (shouldConsiderOpeningSearchController) {
-            CGFloat topOfPreviousCard = CardStackTopMargin;
-            if (self.currentCardIndex > 0) {
-                CardView *previousCard = [self.cards objectAtIndex:self.currentCardIndex - 1];
-                topOfPreviousCard = previousCard.frame.origin.y;
-            }
-
-            BOOL shouldRevealSearchController = (y > self.maximumTotalTitleBarHeightBeforeSearchAppears);
-            if (shouldRevealSearchController) {
-                CGRect frame = self.searchViewController.view.frame;
-                frame.origin.y = ((y - self.maximumTotalTitleBarHeightBeforeSearchAppears) - frame.size.height);
-                if (frame.origin.y <= 0) {
-                    self.searchViewController.view.frame = frame;
-                }
-            }
+       
+        if (([self shouldConsiderOpeningSearchViewController:card]) && ([self shouldRevealSearchViewController:possibleCardFrameY])) {
+                [self calculateSearchViewControllerFrameFrom:possibleCardFrameY];
         }
     }
 }
@@ -661,5 +639,52 @@ springBounciness:(CGFloat)bounciness
     };
     [card pop_addAnimation:springAnimation forKey:@"frame"];
 }
+
+-(void)calculateMaximumTotalTitleBarHeightBeforeSearchAppears{
+    self.maximumTotalTitleBarHeightBeforeSearchAppears = 0;
+    for (NSUInteger index = 0; index < self.currentCardIndex; index++) {
+        CardView *card = [self.cards objectAtIndex:index];
+        self.maximumTotalTitleBarHeightBeforeSearchAppears += (card.titleBarHeight * card.scale - CardStackOffsetToAvoidAreaBelowTheTitleToBecomeVisible) * CardStackMaximumVisibleTitleBarProportion;
+    }
+}
+
+-(BOOL)thisIsNotTheCorrectCard:(CardView *)card{
+    return ((card.tag != self.currentCardIndex &&
+                card.tag != self.cards.count - 1) ||
+            self.cards.count == 1) ;
+}
+
+-(BOOL)shouldConsiderOpeningSearchViewController:(CardView *)card{
+    return (self.searchViewController &&
+            self.isSeachViewControllerHidden &&
+            card.tag == self.currentCardIndex);
+}
+
+-(CGFloat)calculateTopOfPreviousCard{
+    if (self.currentCardIndex > 0) {
+        CardView *previousCard = [self.cards objectAtIndex:self.currentCardIndex - 1];
+        return  previousCard.frame.origin.y;
+    }else{
+        return CardStackTopMargin;
+    }
+
+}
+
+-(BOOL)shouldRevealSearchViewController:(CGFloat)possibleCardFrameY{
+    return (possibleCardFrameY > self.maximumTotalTitleBarHeightBeforeSearchAppears);
+}
+
+-(void)calculateSearchViewControllerFrameFrom:(CGFloat)possibleCardFrameY{
+    CGRect frame = self.searchViewController.view.frame;
+    frame.origin.y = ((possibleCardFrameY - self.maximumTotalTitleBarHeightBeforeSearchAppears) - frame.size.height);
+    if (frame.origin.y <= 0) {
+        self.searchViewController.view.frame = frame;
+    }
+}
+
+-(BOOL)frameMoveExceedsTheTop:(CGFloat)possibleCardFrameY{
+    return   ( (self.originalCardFrame.origin.y + possibleCardFrameY) < 0.0f );
+}
+
 
 @end

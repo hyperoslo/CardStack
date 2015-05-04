@@ -106,6 +106,16 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
         make.centerX.equalTo(viewController.view.mas_centerX);
     }];
 
+    UIButton *removeButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, ExampleButtonWidth, ExampleButtonHeight)];
+    [removeButton setTitle:@"Remove card" forState:UIControlStateNormal];
+    [removeButton setTitleColor:[UIColor orangeColor] forState:UIControlStateNormal];
+    [removeButton addTarget:self action:@selector(removeAction:) forControlEvents:UIControlEventTouchUpInside];
+    [viewController.view addSubview:removeButton];
+    [removeButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(insertBelowButton.mas_bottom).with.offset(ExampleMargin);
+        make.centerX.equalTo(viewController.view.mas_centerX);
+    }];
+
     UILabel *openLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, ExampleButtonWidth, ExampleButtonHeight)];
     openLabel.text = @"Pull down on title bar to open stack";
     openLabel.textAlignment = NSTextAlignmentCenter;
@@ -113,7 +123,7 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
     openLabel.textColor = [UIColor darkGrayColor];
     [viewController.view addSubview:openLabel];
     [openLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(insertBelowButton.mas_bottom).with.offset(3 * ExampleMargin);
+        make.top.equalTo(removeButton.mas_bottom).with.offset(3 * ExampleMargin);
         make.centerX.equalTo(viewController.view.mas_centerX);
     }];
 
@@ -125,17 +135,6 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
     [viewController.view addSubview:tapLabel];
     [tapLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.equalTo(openLabel.mas_bottom).with.offset(2 * ExampleMargin);
-        make.centerX.equalTo(viewController.view.mas_centerX);
-    }];
-
-    UILabel *removeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, ExampleButtonWidth, ExampleButtonHeight)];
-    removeLabel.text = @"Swipe right on title bar to remove a card";
-    removeLabel.textAlignment = NSTextAlignmentCenter;
-    removeLabel.font = [UIFont systemFontOfSize:13.0f];
-    removeLabel.textColor = [UIColor darkGrayColor];
-    [viewController.view addSubview:removeLabel];
-    [removeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(tapLabel.mas_bottom).with.offset(2 * ExampleMargin);
         make.centerX.equalTo(viewController.view.mas_centerX);
     }];
 
@@ -180,6 +179,18 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
                                                     viewController.view.tag = i;
                                                 }
                                             }];
+}
+
+- (void)removeAction:(UIButton *)button {
+    NSInteger index = button.superview.tag;
+    [self.cardStackController removeCardAtIndex:index
+                                       animated:YES
+                                 withCompletion:^{
+                                     for (NSUInteger i = 0; i < self.viewControllers.count; i++) {
+                                         UIViewController *viewController = [self.viewControllers objectAtIndex:i];
+                                         viewController.view.tag = i;
+                                     }
+                                 }];
 }
 
 @end

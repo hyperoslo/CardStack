@@ -107,7 +107,7 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
     }];
 
     UIButton *removeButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, ExampleButtonWidth, ExampleButtonHeight)];
-    [removeButton setTitle:@"Remove a card" forState:UIControlStateNormal];
+    [removeButton setTitle:@"Remove card" forState:UIControlStateNormal];
     [removeButton setTitleColor:[UIColor orangeColor] forState:UIControlStateNormal];
     [removeButton addTarget:self action:@selector(removeAction:) forControlEvents:UIControlEventTouchUpInside];
     [viewController.view addSubview:removeButton];

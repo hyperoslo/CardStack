@@ -183,12 +183,14 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
 
 - (void)removeAction:(UIButton *)button {
     NSInteger index = button.superview.tag;
-    [self.cardStackController removeCardAtIndex:index animated:YES withCompletion:^{
-        for (NSUInteger i = 0; i < self.viewControllers.count; i++) {
-            UIViewController *viewController = [self.viewControllers objectAtIndex:i];
-            viewController.view.tag = i;
-        }
-    }];
+    [self.cardStackController removeCardAtIndex:index
+                                       animated:YES
+                                 withCompletion:^{
+                                     for (NSUInteger i = 0; i < self.viewControllers.count; i++) {
+                                         UIViewController *viewController = [self.viewControllers objectAtIndex:i];
+                                         viewController.view.tag = i;
+                                     }
+                                 }];
 }
 
 @end

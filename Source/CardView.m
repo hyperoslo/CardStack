@@ -203,6 +203,12 @@ static const CGFloat CardStackTitleBarShineImageHeight = 1.0f;
 - (void)setTitleBarDecorationColor:(UIColor *)titleBarDecorationColor {
     _titleBarDecorationColor = titleBarDecorationColor;
     self.titleBarDecorationView.backgroundColor = titleBarDecorationColor;
+    
+    if (titleBarDecorationColor) {
+        CGFloat alpha;
+        [titleBarDecorationColor getRed:nil green:nil blue:nil alpha:&alpha];
+        self.titleBarShineImageView.alpha = alpha;
+    }
 }
 
 - (void)setTitleBarShadowImage:(UIImage *)titleBarShadowImage {

@@ -63,10 +63,10 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
         [self.view addSubview:card];
     }
 
+    self.currentCardIndex = self.cards.count - 1;
+
     // make sure cards' title bar background colors have the depth effect
     [self updateCardTitleBarBackgroundColors];
-
-    self.currentCardIndex = self.cards.count - 1;
 }
 
 - (void)setCurrentCardIndex:(NSUInteger)currentCardIndex {

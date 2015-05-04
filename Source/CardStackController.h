@@ -57,6 +57,7 @@
 - (void)cardStackControllerWillClose:(CardStackController *)cardStackController;
 - (void)cardStackControllerDidOpen:(CardStackController *)cardStackController;
 - (void)cardStackControllerDidClose:(CardStackController *)cardStackController;
+- (void)cardStackControllerDidUndockCards:(CardStackController *)cardStackController;
 
 @end
 

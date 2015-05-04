@@ -178,8 +178,12 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
 - (void)cardTitleTapped:(CardView *)card {
     if (card.tag != self.currentCardIndex) {
         self.isOpen = NO;
-        [self setCurrentCardIndex:card.tag
-                         animated:YES];
+        if (card.tag == self.cards.count - 1) {
+            [self undockCardsWithVerticalVelocity:0];
+        } else {
+            [self setCurrentCardIndex:card.tag
+                             animated:YES];
+        }
     }
 }
 
@@ -272,14 +276,7 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
     } else if (card.tag == self.cards.count - 1) {
         if (velocity.y < 0.0f &&
             fabs(velocity.y) > CardStackVerticalVelocityLimitWhenMakingCardCurrent) {
-            CGRect frame = [self frameForCardAtIndex:card.tag];
-            frame.origin.y = 0;
-            [self moveCard:card toFrame:frame springBounciness:8.0f velocity:CGPointMake(0, velocity.y) withCompletion:^{
-                self.isOpen = NO;
-                self.currentCardIndex = self.cards.count - 1;
-                [self updateCardScales];
-                [self updateCardLocations];
-            }];
+            [self undockCardsWithVerticalVelocity:velocity.y];
         } else {
             [self updateCardLocationsAnimated:YES];
         }
@@ -662,6 +659,21 @@ springBounciness:(CGFloat)bounciness
         }
     };
     [card pop_addAnimation:springAnimation forKey:@"frame"];
+}
+
+- (void)undockCardsWithVerticalVelocity:(CGFloat)verticalVelocity {
+    CardView *card = [self.cards lastObject];
+    CGRect frame = [self frameForCardAtIndex:card.tag];
+    frame.origin.y = 0;
+    [self moveCard:card toFrame:frame springBounciness:8.0f velocity:CGPointMake(0, verticalVelocity) withCompletion:^{
+        self.isOpen = NO;
+        self.currentCardIndex = self.cards.count - 1;
+        [self updateCardScales];
+        [self updateCardLocations];
+        if ([self.delegate respondsToSelector:@selector(cardStackControllerDidUndockCards:)]) {
+            [self.delegate cardStackControllerDidUndockCards:self];
+        }
+    }];
 }
 
 @end

@@ -2,12 +2,10 @@
 #import "CardView.h"
 #import "POP.h"
 
-static const CGFloat CardStackTitleBarBackgroundColorOffset = 1.0f / 16.0f;
 static const CGFloat CardStackTopMargin = 10.0f;
 static const CGFloat CardStackDepthOffset = 0.04f;
 static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
 static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0f;
-static const CGFloat CardStackVerticalVelocityLimitWhenRemovingCard = 100.0f;
 static const CGFloat CardStackOffsetToAvoidAreaBelowTheTitleToBecomeVisible = 1.0f;
 static const CGFloat CardStackMaximumVisibleTitleBarProportion = 1.3f;
 static const CGFloat CardStackMinimumSearchViewControllerHeightPropotion = 0.5f;

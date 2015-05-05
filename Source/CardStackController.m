@@ -189,20 +189,23 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
 
 - (void)card:(CardView *)card titlePannedByDelta:(CGPoint)delta {
     [self calculateMaximumTotalTitleBarHeightBeforeSearchAppears];
-    if ([self thisIsNotTheCorrectCard:card]) {
+    BOOL panningCurrentCard = (card.tag ==  self.currentCardIndex);
+    BOOL panningLastCard = (card.tag ==  self.cards.count - 1);
+    BOOL isOnlyOneCard = (self.cards.count == 1);
+    if ((!panningCurrentCard && !panningLastCard)|| isOnlyOneCard) {
         return;
     }
 
-    CGFloat possibleCardFrameY = self.originalCardFrame.origin.y + delta.y;
+    CGFloat cardOriginYAfterPan = self.originalCardFrame.origin.y + delta.y;
 
-    if (![self frameMoveExceedsTheTop:possibleCardFrameY]) {
+    if (![self frameMoveExceedsTheTop:cardOriginYAfterPan]) {
         CGRect frame = self.originalCardFrame;
-        frame.origin.y = possibleCardFrameY;
+        frame.origin.y = cardOriginYAfterPan;
         card.frame = frame;
         [self updateCardLocationsWhileOpening];
        
-        if (([self shouldConsiderOpeningSearchViewController:card]) && ([self shouldRevealSearchViewController:possibleCardFrameY])) {
-                [self calculateSearchViewControllerFrameFrom:possibleCardFrameY];
+        if ( [self shouldConsiderOpeningSearchViewController:card] && [self shouldRevealSearchViewController:cardOriginYAfterPan] ) {
+                [self setSearchViewControllerFrameUsing:cardOriginYAfterPan];
         }
     }
 }
@@ -640,7 +643,7 @@ springBounciness:(CGFloat)bounciness
     [card pop_addAnimation:springAnimation forKey:@"frame"];
 }
 
--(void)calculateMaximumTotalTitleBarHeightBeforeSearchAppears{
+- (void)calculateMaximumTotalTitleBarHeightBeforeSearchAppears {
     self.maximumTotalTitleBarHeightBeforeSearchAppears = 0;
     for (NSUInteger index = 0; index < self.currentCardIndex; index++) {
         CardView *card = [self.cards objectAtIndex:index];
@@ -648,19 +651,13 @@ springBounciness:(CGFloat)bounciness
     }
 }
 
--(BOOL)thisIsNotTheCorrectCard:(CardView *)card{
-    return ((card.tag != self.currentCardIndex &&
-                card.tag != self.cards.count - 1) ||
-            self.cards.count == 1) ;
-}
-
--(BOOL)shouldConsiderOpeningSearchViewController:(CardView *)card{
+- (BOOL)shouldConsiderOpeningSearchViewController:(CardView *)card {
     return (self.searchViewController &&
             self.isSeachViewControllerHidden &&
             card.tag == self.currentCardIndex);
 }
 
--(CGFloat)calculateTopOfPreviousCard{
+- (CGFloat)calculateTopOfPreviousCard {
     if (self.currentCardIndex > 0) {
         CardView *previousCard = [self.cards objectAtIndex:self.currentCardIndex - 1];
         return  previousCard.frame.origin.y;
@@ -670,20 +667,20 @@ springBounciness:(CGFloat)bounciness
 
 }
 
--(BOOL)shouldRevealSearchViewController:(CGFloat)possibleCardFrameY{
-    return (possibleCardFrameY > self.maximumTotalTitleBarHeightBeforeSearchAppears);
+- (BOOL)shouldRevealSearchViewController:(CGFloat)cardOriginYAfterPan {
+    return (cardOriginYAfterPan > self.maximumTotalTitleBarHeightBeforeSearchAppears);
 }
 
--(void)calculateSearchViewControllerFrameFrom:(CGFloat)possibleCardFrameY{
+- (void)setSearchViewControllerFrameUsing:(CGFloat)cardOriginYAfterPan {
     CGRect frame = self.searchViewController.view.frame;
-    frame.origin.y = ((possibleCardFrameY - self.maximumTotalTitleBarHeightBeforeSearchAppears) - frame.size.height);
+    frame.origin.y = ((cardOriginYAfterPan - self.maximumTotalTitleBarHeightBeforeSearchAppears) - frame.size.height);
     if (frame.origin.y <= 0) {
         self.searchViewController.view.frame = frame;
     }
 }
 
--(BOOL)frameMoveExceedsTheTop:(CGFloat)possibleCardFrameY{
-    return   ( (self.originalCardFrame.origin.y + possibleCardFrameY) < 0.0f );
+- (BOOL)frameMoveExceedsTheTop:(CGFloat)cardOriginYAfterPan {
+    return   ( (self.originalCardFrame.origin.y + cardOriginYAfterPan) < 0.0f );
 }
 
 

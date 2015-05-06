@@ -664,10 +664,6 @@ springBounciness:(CGFloat)bounciness
     [card pop_addAnimation:springAnimation forKey:@"frame"];
 }
 
-- (void)undockCardsAnimated {
-    [self undockCardsWithVerticalVelocity:0];
-}
-
 - (void)undockCardsWithVerticalVelocity:(CGFloat)verticalVelocity {
     CardView *card = [self.cards lastObject];
     CGRect frame = [self frameForCardAtIndex:card.tag];

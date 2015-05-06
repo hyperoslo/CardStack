@@ -48,8 +48,6 @@
 - (CardView *)cardViewForViewController:(UIViewController *)viewController;
 - (NSUInteger)indexForViewController:(UIViewController *)viewController;
 
-- (void)undockCardsAnimated;
-
 @end
 
 @protocol CardStackControllerDelegate <NSObject>

@@ -140,8 +140,13 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
     frame.origin.y = isSeachViewControllerHidden ? -self.searchViewController.view.frame.size.height : 0;
     springAnimation.toValue = [NSValue valueWithCGRect:frame];
     springAnimation.springBounciness = 8;
+    springAnimation.completionBlock = ^(POPAnimation *anim, BOOL finished) {
+        if (completion) {
+            completion();
+        }
+    };
     [self.searchViewController.view pop_addAnimation:springAnimation forKey:@"frame"];
-    
+
     [self updateCardLocationsAnimated:animated];
 }
 

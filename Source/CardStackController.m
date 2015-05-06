@@ -134,6 +134,14 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
     if (isSeachViewControllerHidden) {
         self.isOpen = NO;
     }
+
+    POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
+    CGRect frame = self.searchViewController.view.frame;
+    frame.origin.y = isSeachViewControllerHidden ? -self.searchViewController.view.frame.size.height : 0;
+    springAnimation.toValue = [NSValue valueWithCGRect:frame];
+    springAnimation.springBounciness = 8;
+    [self.searchViewController.view pop_addAnimation:springAnimation forKey:@"frame"];
+    
     [self updateCardLocationsAnimated:animated];
 }
 

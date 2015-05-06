@@ -131,20 +131,10 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
     }
 
     _isSeachViewControllerHidden = isSeachViewControllerHidden;
-    if (animated) {
-        [UIView animateWithDuration:0.5 animations:^{
-            [self updateCardLocations];
-        } completion:^(BOOL finished) {
-            if (completion) {
-                completion();
-            }
-        }];
-    } else {
-        [self updateCardLocations];
-        if (completion) {
-            completion();
-        }
+    if (isSeachViewControllerHidden) {
+        self.isOpen = NO;
     }
+    [self updateCardLocationsAnimated:animated];
 }
 
 #pragma mark - Getters

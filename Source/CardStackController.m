@@ -2,17 +2,16 @@
 #import "CardView.h"
 #import "POP.h"
 
-static const CGFloat CardStackTitleBarBackgroundColorOffset = 1.0f / 16.0f;
 static const CGFloat CardStackTopMargin = 10.0f;
 static const CGFloat CardStackDepthOffset = 0.04f;
 static const CGFloat CardStackOpenIfLargeThanPercent = 0.8f;
 static const CGFloat CardStackVerticalVelocityLimitWhenMakingCardCurrent = 100.0f;
-static const CGFloat CardStackVerticalVelocityLimitWhenRemovingCard = 100.0f;
 static const CGFloat CardStackOffsetToAvoidAreaBelowTheTitleToBecomeVisible = 1.0f;
 static const CGFloat CardStackMaximumVisibleTitleBarProportion = 1.3f;
 static const CGFloat CardStackMinimumSearchViewControllerHeightPropotion = 0.5f;
 static const CGFloat CardStackTitleBarHeightProportionWhenSearchViewControllerIsVisible = 0.2f;
 static const CGFloat CardStackTitleBarHeight = 44.0f;
+static const CGFloat CardStackDefaultSpringBounciness = 8.0f;
 
 @interface CardStackController () <CardViewDelegate>
 
@@ -131,20 +130,23 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
     }
 
     _isSeachViewControllerHidden = isSeachViewControllerHidden;
-    if (animated) {
-        [UIView animateWithDuration:0.5 animations:^{
-            [self updateCardLocations];
-        } completion:^(BOOL finished) {
-            if (completion) {
-                completion();
-            }
-        }];
-    } else {
-        [self updateCardLocations];
+    if (isSeachViewControllerHidden) {
+        self.isOpen = NO;
+    }
+
+    POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
+    CGRect frame = self.searchViewController.view.frame;
+    frame.origin.y = isSeachViewControllerHidden ? -self.searchViewController.view.frame.size.height : 0;
+    springAnimation.toValue = [NSValue valueWithCGRect:frame];
+    springAnimation.springBounciness = CardStackDefaultSpringBounciness;
+    springAnimation.completionBlock = ^(POPAnimation *anim, BOOL finished) {
         if (completion) {
             completion();
         }
-    }
+    };
+    [self.searchViewController.view pop_addAnimation:springAnimation forKey:@"frame"];
+
+    [self updateCardLocationsAnimated:animated];
 }
 
 #pragma mark - Getters
@@ -253,7 +255,7 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
                 CGRect frame = self.searchViewController.view.frame;
                 frame.origin.y = -self.searchViewController.view.frame.size.height;
                 springAnimation.toValue = [NSValue valueWithCGRect:frame];
-                springAnimation.springBounciness = 8;
+                springAnimation.springBounciness = CardStackDefaultSpringBounciness;
                 [self.searchViewController.view pop_addAnimation:springAnimation forKey:@"frame"];
             }
         } else {
@@ -554,7 +556,7 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
         POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPViewFrame];
         CGRect frame = [self frameForCardAtIndex:i];
         springAnimation.toValue = [NSValue valueWithCGRect:frame];
-        springAnimation.springBounciness = 8;
+        springAnimation.springBounciness = CardStackDefaultSpringBounciness;
         BOOL shouldScaleDownVelocityForUpperCardsAvoidingSpringEffectForCardsNearToTheTop = (verticalVelocity > 0.0f && i <= self.currentCardIndex);
         if (shouldScaleDownVelocityForUpperCardsAvoidingSpringEffectForCardsNearToTheTop) {
             CGFloat springVelocity = (verticalVelocity * card.scale) * ((CGFloat)i / (CGFloat)(self.currentCardIndex + 1));
@@ -593,7 +595,7 @@ static const CGFloat CardStackTitleBarHeight = 44.0f;
         CGRect frame = self.searchViewController.view.frame;
         frame.origin.y = (self.isSeachViewControllerHidden ? -self.searchViewController.view.frame.size.height : 0);
         springAnimation.toValue = [NSValue valueWithCGRect:frame];
-        springAnimation.springBounciness = 8;
+        springAnimation.springBounciness = CardStackDefaultSpringBounciness;
         [self.searchViewController.view pop_addAnimation:springAnimation forKey:@"frame"];
     }
 }

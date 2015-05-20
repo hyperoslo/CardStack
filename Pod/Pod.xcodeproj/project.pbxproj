@@ -13,10 +13,11 @@
 		146D72B31AB782920058798C /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 146D72B21AB782920058798C /* Tests.m */; };
 		147872E71AE542020091AE1D /* CardView.m in Sources */ = {isa = PBXBuildFile; fileRef = 147872E61AE542020091AE1D /* CardView.m */; };
 		332C1F8F69719E0E7DE34A23 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 47DD127F087D98A0D25096AC /* libPods.a */; };
-		9A3F16FF1AF228E100229577 /* card_shadow.png in Resources */ = {isa = PBXBuildFile; fileRef = 9A3F16FD1AF228E100229577 /* card_shadow.png */; };
-		9A3F17001AF228E100229577 /* card_shine.png in Resources */ = {isa = PBXBuildFile; fileRef = 9A3F16FE1AF228E100229577 /* card_shine.png */; };
 		9A3286291AF0C9C700149E6C /* CardView.m in Sources */ = {isa = PBXBuildFile; fileRef = 147872E61AE542020091AE1D /* CardView.m */; };
 		9A32862A1AF0C9CC00149E6C /* CardStackController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9AC5E53F1ADC009300FE1E0D /* CardStackController.m */; };
+		9A3E19BA1B0CDDDB00A0FAF3 /* ResizeableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9A3E19B91B0CDDDB00A0FAF3 /* ResizeableViewController.m */; };
+		9A3F16FF1AF228E100229577 /* card_shadow.png in Resources */ = {isa = PBXBuildFile; fileRef = 9A3F16FD1AF228E100229577 /* card_shadow.png */; };
+		9A3F17001AF228E100229577 /* card_shine.png in Resources */ = {isa = PBXBuildFile; fileRef = 9A3F16FE1AF228E100229577 /* card_shine.png */; };
 		9AC5E5401ADC009300FE1E0D /* CardStackController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9AC5E53F1ADC009300FE1E0D /* CardStackController.m */; };
 		F1A5A8384FE327BFD1A5E2CC /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 47DD127F087D98A0D25096AC /* libPods.a */; };
 /* End PBXBuildFile section */
@@ -50,6 +51,8 @@
 		14946611115390DFF8D31297 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		31CB67FA653DFCAE806222A3 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		47DD127F087D98A0D25096AC /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		9A3E19B81B0CDDDB00A0FAF3 /* ResizeableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ResizeableViewController.h; sourceTree = "<group>"; };
+		9A3E19B91B0CDDDB00A0FAF3 /* ResizeableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ResizeableViewController.m; sourceTree = "<group>"; };
 		9A3F16FD1AF228E100229577 /* card_shadow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = card_shadow.png; sourceTree = "<group>"; };
 		9A3F16FE1AF228E100229577 /* card_shine.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = card_shine.png; sourceTree = "<group>"; };
 		9AC5E53E1ADC009300FE1E0D /* CardStackController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CardStackController.h; sourceTree = "<group>"; };
@@ -90,6 +93,8 @@
 			children = (
 				1450496D1AB7858300D9745F /* AppDelegate.h */,
 				1450496E1AB7858300D9745F /* AppDelegate.m */,
+				9A3E19B81B0CDDDB00A0FAF3 /* ResizeableViewController.h */,
+				9A3E19B91B0CDDDB00A0FAF3 /* ResizeableViewController.m */,
 			);
 			path = AppDelegate;
 			sourceTree = "<group>";
@@ -364,6 +369,7 @@
 				9AC5E5401ADC009300FE1E0D /* CardStackController.m in Sources */,
 				146D72991AB782920058798C /* main.m in Sources */,
 				1450496F1AB7858300D9745F /* AppDelegate.m in Sources */,
+				9A3E19BA1B0CDDDB00A0FAF3 /* ResizeableViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,6 +1,7 @@
 #import "AppDelegate.h"
 #import "CardStackController.h"
 #import "Masonry.h"
+#import "ResizeableViewController.h"
 
 static const NSUInteger ExampleNumberOfInitialCards = 4;
 static const CGFloat ExampleButtonWidth = 320.0f;
@@ -81,7 +82,7 @@ static const CGFloat ExampleSearchViewControllerHeight = 100.0f;
 #pragma mark - Other methods
 
 - (UIViewController *)createNewTestViewControllerWithTag:(NSInteger)tag {
-    UIViewController *viewController = [[UIViewController alloc] init];
+    UIViewController *viewController = [ResizeableViewController new];
 
     viewController.view.backgroundColor = [UIColor whiteColor];
     viewController.view.tag = tag;

@@ -647,7 +647,7 @@ static const CGFloat CardStackDefaultSpringBounciness = 8.0f;
     if (index == self.currentCardIndex) {
         CardView *lastCard = [self.cards lastObject];
         BOOL isCurrentCardTheLast = (self.currentCardIndex == self.cards.count - 1);
-        contentHeight = self.view.bounds.size.height - (frame.origin.y + (isCurrentCardTheLast ? 0 : lastCard.titleBarHeight) + 10);
+        contentHeight = self.view.bounds.size.height - (frame.origin.y + (isCurrentCardTheLast ? 0 : lastCard.titleBarHeight));
     }
     UIViewController *viewController = [self.viewControllers objectAtIndex:index];
     if ([viewController respondsToSelector:@selector(setContentHeight:)]) {

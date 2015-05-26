@@ -143,6 +143,11 @@ static const CGFloat CardStackDefaultSpringBounciness = 8.0f;
         if (completion) {
             completion();
         }
+        if (isSeachViewControllerHidden) {
+            if ([self.delegate respondsToSelector:@selector(cardStackControllerDidCloseSearch:)]) {
+                [self.delegate cardStackControllerDidCloseSearch:self];
+            }
+        }
     };
     [self.searchViewController.view pop_addAnimation:springAnimation forKey:@"frame"];
     if (isSeachViewControllerHidden) {
@@ -261,6 +266,11 @@ static const CGFloat CardStackDefaultSpringBounciness = 8.0f;
                 frame.origin.y = -self.searchViewController.view.frame.size.height;
                 springAnimation.toValue = [NSValue valueWithCGRect:frame];
                 springAnimation.springBounciness = CardStackDefaultSpringBounciness;
+                springAnimation.completionBlock = ^(POPAnimation *anim, BOOL finished) {
+                    if ([self.delegate respondsToSelector:@selector(cardStackControllerDidCloseSearch:)]) {
+                        [self.delegate cardStackControllerDidCloseSearch:self];
+                    }
+                };
                 [self.searchViewController.view pop_addAnimation:springAnimation forKey:@"frame"];
                 if ([self.delegate respondsToSelector:@selector(cardStackControllerWillCloseSearch:)]) {
                     [self.delegate cardStackControllerWillCloseSearch:self];
@@ -604,6 +614,13 @@ static const CGFloat CardStackDefaultSpringBounciness = 8.0f;
         frame.origin.y = (self.isSeachViewControllerHidden ? -self.searchViewController.view.frame.size.height : 0);
         springAnimation.toValue = [NSValue valueWithCGRect:frame];
         springAnimation.springBounciness = CardStackDefaultSpringBounciness;
+        springAnimation.completionBlock = ^(POPAnimation *anim, BOOL finished) {
+            if (self.isSeachViewControllerHidden) {
+                if ([self.delegate respondsToSelector:@selector(cardStackControllerDidCloseSearch:)]) {
+                    [self.delegate cardStackControllerDidCloseSearch:self];
+                }
+            }
+        };
         [self.searchViewController.view pop_addAnimation:springAnimation forKey:@"frame"];
         if (self.isSeachViewControllerHidden) {
             if ([self.delegate respondsToSelector:@selector(cardStackControllerWillCloseSearch:)]) {

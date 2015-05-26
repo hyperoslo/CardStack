@@ -145,6 +145,11 @@ static const CGFloat CardStackDefaultSpringBounciness = 8.0f;
         }
     };
     [self.searchViewController.view pop_addAnimation:springAnimation forKey:@"frame"];
+    if (isSeachViewControllerHidden) {
+        if ([self.delegate respondsToSelector:@selector(cardStackControllerWillCloseSearch:)]) {
+            [self.delegate cardStackControllerWillCloseSearch:self];
+        }
+    }
 
     [self updateCardLocationsAnimated:animated];
 }
@@ -257,6 +262,9 @@ static const CGFloat CardStackDefaultSpringBounciness = 8.0f;
                 springAnimation.toValue = [NSValue valueWithCGRect:frame];
                 springAnimation.springBounciness = CardStackDefaultSpringBounciness;
                 [self.searchViewController.view pop_addAnimation:springAnimation forKey:@"frame"];
+                if ([self.delegate respondsToSelector:@selector(cardStackControllerWillCloseSearch:)]) {
+                    [self.delegate cardStackControllerWillCloseSearch:self];
+                }
             }
         } else {
             CGFloat heightAboveCurrentCardWhenOpen = CardStackTopMargin;
@@ -597,6 +605,11 @@ static const CGFloat CardStackDefaultSpringBounciness = 8.0f;
         springAnimation.toValue = [NSValue valueWithCGRect:frame];
         springAnimation.springBounciness = CardStackDefaultSpringBounciness;
         [self.searchViewController.view pop_addAnimation:springAnimation forKey:@"frame"];
+        if (self.isSeachViewControllerHidden) {
+            if ([self.delegate respondsToSelector:@selector(cardStackControllerWillCloseSearch:)]) {
+                [self.delegate cardStackControllerWillCloseSearch:self];
+            }
+        }
     }
 }
 

@@ -58,7 +58,6 @@
 - (void)cardStackControllerDidOpen:(CardStackController *)cardStackController;
 - (void)cardStackControllerDidClose:(CardStackController *)cardStackController;
 - (void)cardStackControllerDidUndockCards:(CardStackController *)cardStackController;
-- (void)cardStackControllerWillCloseSearch:(CardStackController *)cardStackController;
 - (void)cardStackControllerDidCloseSearch:(CardStackController *)cardStackController;
 
 @end

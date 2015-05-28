@@ -70,3 +70,9 @@
 - (UIImage *)cardStackController:(CardStackController *)cardStackController titleBarShineImageForCardAtIndex:(NSUInteger)index;
 
 @end
+
+@protocol CardStackResizeableViewController <NSObject>
+
+- (void)setContentHeight:(CGFloat)contentHeight;
+
+@end

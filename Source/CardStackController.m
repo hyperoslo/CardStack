@@ -662,6 +662,18 @@ static const CGFloat CardStackDefaultSpringBounciness = 8.0f;
         frame.origin.y = self.view.bounds.size.height - card.titleBarHeight;
     }
 
+    CGFloat contentHeight = self.view.bounds.size.height;
+    if (index == self.currentCardIndex) {
+        CardView *lastCard = [self.cards lastObject];
+        BOOL isCurrentCardTheLast = (self.currentCardIndex == self.cards.count - 1);
+        contentHeight = self.view.bounds.size.height - (frame.origin.y + (isCurrentCardTheLast ? 0 : lastCard.titleBarHeight));
+    }
+    UIViewController *viewController = [self.viewControllers objectAtIndex:index];
+    if ([viewController respondsToSelector:@selector(setContentHeight:)]) {
+        id<CardStackResizeableViewController> resizeableViewController = (id<CardStackResizeableViewController>)viewController;
+        [resizeableViewController setContentHeight:contentHeight];
+    }
+
     return frame;
 }
 
